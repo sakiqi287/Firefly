@@ -51,6 +51,32 @@ def _find_blog_root():
 ROOT_DIR = _find_blog_root()
 
 
+def _find_git_exe():
+    """自动查找 git.exe 路径"""
+    # 先尝试直接调用
+    try:
+        r = subprocess.run(["git", "--version"], capture_output=True, text=True, timeout=10)
+        if r.returncode == 0:
+            return "git"
+    except:
+        pass
+
+    # 常见安装路径
+    common_paths = [
+        r"C:\Program Files\Git\bin\git.exe",
+        r"C:\Program Files (x86)\Git\bin\git.exe",
+        r"C:\Git\bin\git.exe",
+        r"~\AppData\Local\Programs\Git\bin\git.exe",
+    ]
+
+    for path in common_paths:
+        path = os.path.expanduser(path)
+        if os.path.exists(path):
+            return path
+
+    return None
+
+
 # ========= 主程序 =========
 class BlogManager:
     def __init__(self, root):
@@ -516,15 +542,21 @@ class BlogManager:
     def action_insert_download_link(self):
         self.content_text.insert(tk.INSERT, "\n链接：https://pan.xunlei.com/s/xxxxxx#\n提取码：xxxx\n")
 
-    # ---------- Git 推送 ----------
+# ---------- Git 推送 ----------
     def action_git_push(self):
         """入口：先在后台线程执行 git status，再回主线程弹出确认框"""
         self.set_status("🔍 检查 Git 状态...")
 
         def worker():
             try:
+                # 查找 git 路径
+                git_cmd = _find_git_exe()
+                if not git_cmd:
+                    self.root.after(0, lambda: self._git_fail("找不到 Git！\n\n请安装 Git 并添加到系统 PATH，或手动选择 git.exe 文件"))
+                    return
+
                 r = subprocess.run(
-                    ["git", "status", "--short"],
+                    [git_cmd, "status", "--short"],
                     cwd=str(ROOT_DIR), capture_output=True, text=True, timeout=30
                 )
                 if r.returncode != 0:
@@ -557,19 +589,24 @@ class BlogManager:
 
         def push_worker():
             try:
+                git_cmd = _find_git_exe()
+                if not git_cmd:
+                    self.root.after(0, lambda: self._git_fail("找不到 Git！"))
+                    return
+
                 self.root.after(0, lambda: self.set_status("📤 git add ..."))
-                r = subprocess.run(["git", "add", "-A"], cwd=str(ROOT_DIR), capture_output=True, text=True, timeout=30)
+                r = subprocess.run([git_cmd, "add", "-A"], cwd=str(ROOT_DIR), capture_output=True, text=True, timeout=30)
                 if r.returncode != 0:
                     raise Exception(r.stderr.strip() or "git add 失败")
 
                 self.root.after(0, lambda: self.set_status("📝 git commit ..."))
                 msg = f"更新文章：{datetime.now().strftime('%Y-%m-%d %H:%M')}"
-                r = subprocess.run(["git", "commit", "-m", msg], cwd=str(ROOT_DIR), capture_output=True, text=True, timeout=30)
+                r = subprocess.run([git_cmd, "commit", "-m", msg], cwd=str(ROOT_DIR), capture_output=True, text=True, timeout=30)
                 if r.returncode != 0 and "nothing to commit" not in (r.stdout + r.stderr):
                     raise Exception(r.stderr.strip() or "git commit 失败")
 
                 self.root.after(0, lambda: self.set_status("🚀 git push ..."))
-                r = subprocess.run(["git", "push"], cwd=str(ROOT_DIR), capture_output=True, text=True, timeout=120)
+                r = subprocess.run([git_cmd, "push"], cwd=str(ROOT_DIR), capture_output=True, text=True, timeout=120)
                 if r.returncode != 0:
                     raise Exception(r.stderr.strip() or "git push 失败（可能未关联远程仓库？）")
 
