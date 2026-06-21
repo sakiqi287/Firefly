@@ -411,46 +411,71 @@ class BlogManagerApp:
             messagebox.showerror("错误", "无法打开目录")
 
     def git_push(self):
-        """Git推送 - 打开独立命令行窗口"""
+        """Git推送 - 显示日志窗口"""
         project_dir = os.path.dirname(POSTS_DIR)
         commit_msg = simpledialog.askstring("提交信息", "请输入提交信息:")
         if not commit_msg:
             return
 
-        # 创建批处理脚本
-        bat_content = f"""@echo off
-chcp 65001 >nul
-cd /d "{project_dir}"
-echo ============================================
-echo   Firefly 博客 Git 推送
-echo ============================================
-echo.
-echo [1/4] git add -A
-git add -A
-echo.
-echo [2/4] git status
-git status
-echo.
-echo [3/4] git commit -m "{commit_msg}"
-git commit -m "{commit_msg}"
-echo.
-echo [4/4] git push
-git push
-echo.
-echo ============================================
-echo   完成! 按任意键退出...
-echo ============================================
-pause >nul
-"""
-        bat_path = os.path.join(project_dir, "_git_push_temp.bat")
-        with open(bat_path, 'w', encoding='utf-8') as f:
-            f.write(bat_content)
+        # 打开一个新的日志窗口
+        log_dialog = tk.Toplevel(self.root)
+        log_dialog.title("Git 推送")
+        log_dialog.geometry("700x500")
+        log_dialog.transient(self.root)
 
-        try:
-            subprocess.Popen(['cmd', '/c', 'start', 'cmd', '/k', bat_path], shell=False)
-            messagebox.showinfo("提示", "已打开命令行窗口执行推送操作")
-        except Exception as e:
-            messagebox.showerror("错误", f"执行失败: {str(e)}")
+        log_text = tk.Text(log_dialog, wrap=tk.WORD, font=("Consolas", 10))
+        log_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        scrollbar = ttk.Scrollbar(log_dialog, orient=tk.VERTICAL, command=log_text.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        log_text.configure(yscrollcommand=scrollbar.set)
+
+        btn_frame = ttk.Frame(log_dialog)
+        btn_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        close_btn = ttk.Button(btn_frame, text="关闭", command=log_dialog.destroy)
+        close_btn.pack(side=tk.RIGHT)
+
+        # 在后台线程中执行 git 命令
+        def run_git():
+            import threading
+            def worker():
+                commands = [
+                    ("git add -A", ["git", "-C", project_dir, "add", "-A"]),
+                    ("git status", ["git", "-C", project_dir, "status"]),
+                    (f'git commit -m "{commit_msg}"', ["git", "-C", project_dir, "commit", "-m", commit_msg]),
+                    ("git push", ["git", "-C", project_dir, "push"]),
+                ]
+                log_dialog.after(0, lambda: log_text.insert(tk.END, "开始执行...\n\n"))
+
+                for name, cmd in commands:
+                    log_dialog.after(0, lambda n=name: log_text.insert(tk.END, f">>> {n}\n"))
+                    log_dialog.after(0, log_text.see, tk.END)
+                    try:
+                        result = subprocess.run(
+                            cmd, capture_output=True, text=True, encoding='utf-8', cwd=project_dir
+                        )
+                        if result.stdout:
+                            for line in result.stdout.strip().split('\n'):
+                                log_dialog.after(0, lambda l=line: log_text.insert(tk.END, l + "\n"))
+                        if result.stderr:
+                            for line in result.stderr.strip().split('\n'):
+                                log_dialog.after(0, lambda l=line: log_text.insert(tk.END, l + "\n"))
+                        if result.returncode == 0:
+                            log_dialog.after(0, lambda: log_text.insert(tk.END, "✓ 成功\n\n"))
+                        else:
+                            log_dialog.after(0, lambda: log_text.insert(tk.END, "✗ 失败\n\n"))
+                    except Exception as e:
+                        log_dialog.after(0, lambda err=e: log_text.insert(tk.END, f"错误: {err}\n\n"))
+                    log_dialog.after(0, log_text.see, tk.END)
+
+                log_dialog.after(0, lambda: log_text.insert(tk.END, "=" * 50 + "\n完成！请查看上面的日志。\n"))
+                log_dialog.after(0, log_text.see, tk.END)
+
+            threading.Thread(target=worker, daemon=True).start()
+
+        # 先显示日志
+        log_dialog.after(100, run_git)
 
 if __name__ == '__main__':
     root = tk.Tk()
