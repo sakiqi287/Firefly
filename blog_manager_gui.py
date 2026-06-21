@@ -17,7 +17,38 @@ from pathlib import Path
 
 # ========= 配置 =========
 POSTS_DIR = "src/content/posts"
-ROOT_DIR = Path(__file__).resolve().parent
+
+# 打包后自动定位博客根目录（包含 src/content/posts 的目录）
+import sys
+
+def _find_blog_root():
+    # 1. 开发模式：脚本所在目录
+    script_dir = Path(__file__).resolve().parent
+
+    # 2. 打包模式：exe 所在目录
+    if getattr(sys, "frozen", False):
+        script_dir = Path(sys.executable).resolve().parent
+
+    # 3. 逐级往上找 src/content/posts
+    search_dirs = [script_dir]
+    for parent in script_dir.parents:
+        search_dirs.append(parent)
+
+    for d in search_dirs:
+        if (d / POSTS_DIR).exists():
+            return d
+
+    # 4. 找不到就弹框让用户选
+    root = tk.Tk()
+    root.withdraw()
+    result = filedialog.askdirectory(title="请选择博客根目录（包含 src/content/posts 的文件夹）")
+    root.destroy()
+    if not result:
+        messagebox.showerror("错误", "未选择博客目录，程序退出。")
+        sys.exit(1)
+    return Path(result)
+
+ROOT_DIR = _find_blog_root()
 
 
 # ========= 主程序 =========
