@@ -672,20 +672,26 @@ const bannerCarouselInterval = Math.max(
                             {backgroundWallpaper.common.homeText.title}
                         </div>
                     )}
-                    {backgroundWallpaper.common?.homeText?.subtitle && (
-                        <div id="banner-subtitle" class="banner-subtitle text-white/90 leading-snug" style={{ fontSize: backgroundWallpaper.common.homeText.subtitleSize || "1.5rem" }} data-subtitles={JSON.stringify(backgroundWallpaper.common.homeText.subtitle)}>
-                            {backgroundWallpaper.common.homeText.typewriter?.enable ? (
-                                <TypewriterText
-                                    text={backgroundWallpaper.common.homeText.subtitle}
-                                    speed={backgroundWallpaper.common.homeText.typewriter.speed}
-                                    deleteSpeed={backgroundWallpaper.common.homeText.typewriter.deleteSpeed}
-                                    pauseTime={backgroundWallpaper.common.homeText.typewriter.pauseTime}
-                                />
-                            ) : (
-                                randomSubtitle
-                            )}
-                        </div>
-                    )}
+                    {(() => {
+                        const subtitle = backgroundWallpaper.common?.homeText?.subtitle;
+                        const hasSubtitle = Array.isArray(subtitle)
+                            ? subtitle.length > 0
+                            : !!subtitle;
+                        return hasSubtitle ? (
+                            <div id="banner-subtitle" class="banner-subtitle text-white/90 leading-snug" style={{ fontSize: backgroundWallpaper.common.homeText.subtitleSize || "1.5rem" }} data-subtitles={JSON.stringify(subtitle)}>
+                                {backgroundWallpaper.common.homeText.typewriter?.enable ? (
+                                    <TypewriterText
+                                        text={subtitle}
+                                        speed={backgroundWallpaper.common.homeText.typewriter.speed}
+                                        deleteSpeed={backgroundWallpaper.common.homeText.typewriter.deleteSpeed}
+                                        pauseTime={backgroundWallpaper.common.homeText.typewriter.pauseTime}
+                                    />
+                                ) : (
+                                    randomSubtitle
+                                )}
+                            </div>
+                        ) : null;
+                    })()}
                 </div>
             </div>
         </div>
