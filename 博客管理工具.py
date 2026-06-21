@@ -455,16 +455,22 @@ class BlogManagerApp:
                         result = subprocess.run(
                             cmd, capture_output=True, text=True, encoding='utf-8', cwd=project_dir
                         )
-                        if result.stdout:
-                            for line in result.stdout.strip().split('\n'):
+                        output = (result.stdout or '').strip()
+                        err_output = (result.stderr or '').strip()
+                        if output:
+                            for line in output.split('\n'):
                                 log_dialog.after(0, lambda l=line: log_text.insert(tk.END, l + "\n"))
-                        if result.stderr:
-                            for line in result.stderr.strip().split('\n'):
+                        if err_output:
+                            for line in err_output.split('\n'):
                                 log_dialog.after(0, lambda l=line: log_text.insert(tk.END, l + "\n"))
                         if result.returncode == 0:
                             log_dialog.after(0, lambda: log_text.insert(tk.END, "✓ 成功\n\n"))
                         else:
-                            log_dialog.after(0, lambda: log_text.insert(tk.END, "✗ 失败\n\n"))
+                            # 如果是 "nothing to commit"，不算失败
+                            if 'nothing to commit' in output or 'nothing to commit' in err_output:
+                                log_dialog.after(0, lambda: log_text.insert(tk.END, "ℹ 没有改动，跳过提交\n\n"))
+                            else:
+                                log_dialog.after(0, lambda: log_text.insert(tk.END, "✗ 失败\n\n"))
                     except Exception as e:
                         log_dialog.after(0, lambda err=e: log_text.insert(tk.END, f"错误: {err}\n\n"))
                     log_dialog.after(0, log_text.see, tk.END)
