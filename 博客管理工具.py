@@ -210,8 +210,11 @@ class BlogManagerApp:
             if filepath:
                 cover_info["path"] = filepath
                 filename = os.path.basename(filepath)
+                # 自动清理文件名
+                safe_name = re.sub(r'[\s()\[\]{}]+', '_', filename)
+                safe_name = re.sub(r'_+', '_', safe_name)
                 cover_entry.delete(0, tk.END)
-                cover_entry.insert(0, f"./images/{filename}")
+                cover_entry.insert(0, f"./images/{safe_name}")
 
         ttk.Button(info_frame, text="选择图片", command=select_cover).grid(row=row, column=2, sticky=tk.W, padx=5, pady=5)
 
@@ -263,9 +266,12 @@ class BlogManagerApp:
             if filepaths:
                 for fp in filepaths:
                     filename = os.path.basename(fp)
-                    dest = os.path.join(images_dir, filename)
+                    # 自动清理文件名：空格和括号替换为下划线，避免Markdown解析失败
+                    safe_name = re.sub(r'[\s()\[\]{}]+', '_', filename)
+                    safe_name = re.sub(r'_+', '_', safe_name)
+                    dest = os.path.join(images_dir, safe_name)
                     shutil.copy2(fp, dest)
-                    content_text.insert(tk.INSERT, f"![{filename}](./images/{filename})\n\n")
+                    content_text.insert(tk.INSERT, f"![{safe_name}](./images/{safe_name})\n\n")
 
         def insert_link():
             url = simpledialog.askstring("插入链接", "请输入链接地址:")
@@ -338,9 +344,11 @@ class BlogManagerApp:
             if cover_info["path"] and cover:
                 try:
                     cover_filename = os.path.basename(cover_info["path"])
-                    dest = os.path.join(images_dir, cover_filename)
+                    safe_cover_name = re.sub(r'[\s()\[\]{}]+', '_', cover_filename)
+                    safe_cover_name = re.sub(r'_+', '_', safe_cover_name)
+                    dest = os.path.join(images_dir, safe_cover_name)
                     shutil.copy2(cover_info["path"], dest)
-                    cover_value = f"./images/{cover_filename}"
+                    cover_value = f"./images/{safe_cover_name}"
                 except Exception as e:
                     messagebox.showwarning("提示", f"封面复制失败: {e}")
 
