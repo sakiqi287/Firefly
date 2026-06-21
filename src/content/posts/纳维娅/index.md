@@ -1,8 +1,7 @@
 ---
 title: "纳维娅"
 published: 2026-06-20
-tags: []
-category: 水淼
+tags: ["水淼"]
 image: ./images/1_.jpg
 ---
 
