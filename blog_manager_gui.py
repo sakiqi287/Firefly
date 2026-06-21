@@ -557,7 +557,8 @@ class BlogManager:
 
                 r = subprocess.run(
                     [git_cmd, "status", "--short"],
-                    cwd=str(ROOT_DIR), capture_output=True, text=True, timeout=30
+                    cwd=str(ROOT_DIR), capture_output=True, text=True, timeout=30,
+                    creationflags=subprocess.CREATE_NO_WINDOW if hasattr(subprocess, 'CREATE_NO_WINDOW') else 0
                 )
                 if r.returncode != 0:
                     err = r.stderr.strip() or "git status 失败（可能未初始化 Git 仓库？）"
@@ -595,18 +596,21 @@ class BlogManager:
                     return
 
                 self.root.after(0, lambda: self.set_status("📤 git add ..."))
-                r = subprocess.run([git_cmd, "add", "-A"], cwd=str(ROOT_DIR), capture_output=True, text=True, timeout=30)
+                r = subprocess.run([git_cmd, "add", "-A"], cwd=str(ROOT_DIR), capture_output=True, text=True, timeout=30,
+                    creationflags=subprocess.CREATE_NO_WINDOW if hasattr(subprocess, 'CREATE_NO_WINDOW') else 0)
                 if r.returncode != 0:
                     raise Exception(r.stderr.strip() or "git add 失败")
 
                 self.root.after(0, lambda: self.set_status("📝 git commit ..."))
                 msg = f"更新文章：{datetime.now().strftime('%Y-%m-%d %H:%M')}"
-                r = subprocess.run([git_cmd, "commit", "-m", msg], cwd=str(ROOT_DIR), capture_output=True, text=True, timeout=30)
+                r = subprocess.run([git_cmd, "commit", "-m", msg], cwd=str(ROOT_DIR), capture_output=True, text=True, timeout=30,
+                    creationflags=subprocess.CREATE_NO_WINDOW if hasattr(subprocess, 'CREATE_NO_WINDOW') else 0)
                 if r.returncode != 0 and "nothing to commit" not in (r.stdout + r.stderr):
                     raise Exception(r.stderr.strip() or "git commit 失败")
 
                 self.root.after(0, lambda: self.set_status("🚀 git push ..."))
-                r = subprocess.run([git_cmd, "push"], cwd=str(ROOT_DIR), capture_output=True, text=True, timeout=120)
+                r = subprocess.run([git_cmd, "push"], cwd=str(ROOT_DIR), capture_output=True, text=True, timeout=120,
+                    creationflags=subprocess.CREATE_NO_WINDOW if hasattr(subprocess, 'CREATE_NO_WINDOW') else 0)
                 if r.returncode != 0:
                     raise Exception(r.stderr.strip() or "git push 失败（可能未关联远程仓库？）")
 
