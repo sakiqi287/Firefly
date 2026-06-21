@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['blog_manager_gui.py'],
+    ['博客管理工具.py'],
     pathex=[],
     binaries=[],
     datas=[],
