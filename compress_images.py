@@ -1,51 +1,77 @@
 import os
 from PIL import Image
 
-def compress_image(image_path, max_size_mb=2, max_dimension=1920, quality=80):
+def compress_image(input_path, max_size_mb=8, max_dim=1920):
     try:
-        img = Image.open(image_path)
-        original_size = os.path.getsize(image_path) / (1024 * 1024)
-
-        if original_size <= max_size_mb and max(img.size) <= max_dimension:
-            print(f"  SKIP: {os.path.basename(image_path)} ({original_size:.1f}MB)")
-            return False
-
-        print(f"  压缩: {os.path.basename(image_path)} ({original_size:.1f}MB, {img.size[0]}x{img.size[1]})")
-
-        if img.mode in ('RGBA', 'P', 'LA'):
-            img = img.convert('RGB')
-
-        width, height = img.size
-        if max(img.size) > max_dimension:
-            ratio = max_dimension / max(width, height)
-            new_size = (int(width * ratio), int(height * ratio))
-            img = img.resize(new_size, Image.LANCZOS)
-
-        img.save(image_path, 'JPEG', quality=quality, optimize=True)
-
-        new_size = os.path.getsize(image_path) / (1024 * 1024)
-        print(f"  -> {new_size:.1f}MB ({img.size[0]}x{img.size[1]})")
-        return True
+        img = Image.open(input_path)
+        original_size = os.path.getsize(input_path)
+        original_size_mb = original_size / (1024 * 1024)
+        
+        if original_size_mb <= max_size_mb:
+            return None
+        
+        w, h = img.size
+        scale = min(max_dim / w, max_dim / h, 1)
+        
+        if scale < 1:
+            new_w = int(w * scale)
+            new_h = int(h * scale)
+            img = img.resize((new_w, new_h), Image.LANCZOS)
+        
+        quality = 85
+        ext = os.path.splitext(input_path)[1].lower()
+        tmp_path = input_path + ".tmp"
+        
+        if ext == '.png':
+            img.save(tmp_path, optimize=True)
+        else:
+            img.save(tmp_path, quality=quality, optimize=True)
+        
+        new_size_mb = os.path.getsize(tmp_path) / (1024 * 1024)
+        
+        if new_size_mb > max_size_mb:
+            while new_size_mb > max_size_mb and quality > 10:
+                quality -= 10
+                if ext == '.png':
+                    img.save(tmp_path, optimize=True)
+                else:
+                    img.save(tmp_path, quality=quality, optimize=True)
+                new_size_mb = os.path.getsize(tmp_path) / (1024 * 1024)
+        
+        os.remove(input_path)
+        os.rename(tmp_path, input_path)
+        return (original_size_mb, new_size_mb)
     except Exception as e:
-        print(f"  ERROR: {e}")
-        return False
+        print(f"Error processing {input_path}: {e}")
+        return None
 
 def main():
-    posts_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src', 'content', 'posts')
-    total_compressed = 0
-    total_saved_mb = 0
-
-    for root, dirs, files in os.walk(posts_dir):
+    base_dir = 'src/content/posts'
+    extensions = ('.jpg', '.jpeg', '.png')
+    total_original = 0
+    total_new = 0
+    count = 0
+    
+    for root, dirs, files in os.walk(base_dir):
         for f in files:
-            if f.lower().endswith(('.jpg', '.jpeg', '.png')):
-                image_path = os.path.join(root, f)
-                old_size = os.path.getsize(image_path) / (1024 * 1024)
-                if compress_image(image_path):
-                    new_size = os.path.getsize(image_path) / (1024 * 1024)
-                    total_compressed += 1
-                    total_saved_mb += (old_size - new_size)
-
-    print(f"\n完成！共压缩 {total_compressed} 张图片，节省 {total_saved_mb:.1f} MB")
+            if f.lower().endswith(extensions):
+                if f.endswith('.tmp'):
+                    continue
+                filepath = os.path.join(root, f)
+                result = compress_image(filepath)
+                if result:
+                    orig, new = result
+                    saved = orig - new
+                    print(f"Compressed: {filepath}")
+                    print(f"  {orig:.2f} MB -> {new:.2f} MB (saved {saved:.2f} MB)")
+                    total_original += orig
+                    total_new += new
+                    count += 1
+    
+    print(f"\nTotal processed: {count} files")
+    print(f"Total original: {total_original:.2f} MB")
+    print(f"Total new: {total_new:.2f} MB")
+    print(f"Total saved: {total_original - total_new:.2f} MB")
 
 if __name__ == '__main__':
     main()
