@@ -1,0 +1,14 @@
+# Cloudflare Workers 配置 - 用于部署静态网站
+name = "huiyu"
+compatibility_date = "2024-01-01"
+
+# 静态资源配置
+[assets]
+directory = "./dist"
+
+# 构建配置
+[build]
+command = "pnpm run build"
+
+[vars]
+NODE_VERSION = "22"
