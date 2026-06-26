@@ -127,27 +127,24 @@ const path = customPath || (id ? `/posts/${id}` : "");
      )
    }
 
-  <!-- Twikoo访问量统计（首页不显示，且文章访问量统计启用时显示） -->
+  <!-- 不蒜子访问量统计（首页不显示） -->
   {
-    !isHome &&
-      commentConfig.type === 'twikoo' &&
-      commentConfig.twikoo?.visitorCount &&
-      id && (
-        <div class="flex items-center">
-          <div class="meta-icon">
-            <Icon is:inline
-              name="material-symbols:visibility-outline-rounded"
-              class="text-xl"
-            />
-          </div>
-          <span class="text-50 text-sm font-medium mr-1">
-            {i18n(I18nKey.pageViews)}
-          </span>
-          <span class="text-50 text-sm font-medium" id="twikoo_visitors">
-            {i18n(I18nKey.pageViewsLoading)}
-          </span>
+    !isHome && id && (
+      <div class="flex items-center">
+        <div class="meta-icon">
+          <Icon is:inline
+            name="material-symbols:visibility-outline-rounded"
+            class="text-xl"
+          />
         </div>
-      )
+        <span class="text-50 text-sm font-medium mr-1">
+          {i18n(I18nKey.pageViews)}
+        </span>
+        <span class="text-50 text-sm font-medium">
+          <span id="busuanzi_value_page_pv">0</span>
+        </span>
+      </div>
+    )
   }
   <!-- Waline访问量统计（首页不显示、仅type为waline时显示） -->
   {
