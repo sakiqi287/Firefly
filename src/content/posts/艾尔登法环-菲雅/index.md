@@ -10,6 +10,6 @@ tags: ["小仓千代"]
 ![1_43_.jpg](./images/1_43_.jpg)
 
 内容合集在此
-链接：https://pan.xunlei.com/s/VOw2JL9uHqYFsm49n2tZROQGA1#
+链接：https://pan.xunlei.com/s/VOw2JL9uHqYFsm49n2tZROQGA1
 提取码：abtu
 复制这段内容后打开迅雷，查看更方便
