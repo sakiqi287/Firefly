@@ -53,6 +53,15 @@ const config = {
           .init(dynamicConfig)
           .then(() => {
             console.log("[Twikoo] 初始化完成");
+            // 获取访问量
+            twikoo.getCount({ path: dynamicConfig.path }).then((res) => {
+              const visitorsEl = document.getElementById("twikoo_visitors");
+              if (visitorsEl && res && res.count !== undefined) {
+                visitorsEl.textContent = res.count;
+              }
+            }).catch((err) => {
+              console.error("[Twikoo] 获取访问量失败:", err);
+            });
           })
           .catch((error) => {
             console.error("[Twikoo] 初始化失败:", error);
