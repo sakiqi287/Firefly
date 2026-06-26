@@ -14,5 +14,3 @@ image: ./images/056.jpg
 ![038.jpg](./images/038.jpg)
 
 ![043.jpg](./images/043.jpg)
-
-![041.jpg](./images/041.jpg)
