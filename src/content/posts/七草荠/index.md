@@ -2,6 +2,7 @@
 title: "七草荠"
 published: 2026-06-23
 image: ./images/056.jpg
+tags: ["白栎"]
 ---
 
 七草荠
