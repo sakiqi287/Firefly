@@ -3,7 +3,6 @@ title: "堕落学院"
 published: 2026-06-22
 image: ./images/1_15_.jpg
 tags: ["阿熏"]
-pinned: true
 ---
 
 堕落学院
