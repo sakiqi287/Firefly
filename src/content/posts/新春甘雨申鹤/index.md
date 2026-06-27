@@ -3,7 +3,6 @@ title: "新春甘雨申鹤"
 published: 2026-06-26
 image: ./images/1_9_.JPG
 tags: ["九言"]
-pinned: true
 ---
 
 新春甘雨申鹤
