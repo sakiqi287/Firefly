@@ -10,7 +10,5 @@ tags: ["布丁大法"]
 ![B60FAFB738612C0A45120D4BAD247011.jpg](./images/B60FAFB738612C0A45120D4BAD247011.jpg)
 
 内容合集在此
-链接：https://pan.xunlei.com/s/VOwAkqRNK7B4Y1FPzcFQaFJqA1#
-提取码：d3bp
 
 夸克链接：https://pan.quark.cn/s/493545e6eb34
