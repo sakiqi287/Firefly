@@ -3,7 +3,6 @@ title: "咲妃"
 published: 2026-06-27
 image: ./images/1_8_.webp
 tags: ["爱莉"]
-pinned: true
 ---
 
 咲妃

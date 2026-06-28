@@ -3,7 +3,6 @@ title: "达妮娅"
 published: 2026-06-27
 image: ./images/004.jpg
 tags: ["白栎"]
-pinned: true
 ---
 
 达妮娅
