@@ -2,6 +2,7 @@
 title: "天狼星"
 published: 2026-06-29
 image: ./images/1_41_.jpg
+tags: ["阿熏"]
 ---
 
 天狼星
