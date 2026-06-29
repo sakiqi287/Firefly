@@ -58,8 +58,8 @@ let img: ImageMetadata | null = null;
 if (isLocal) {
 	const files = import.meta.glob<ImageMetadata>(
 		[
-			"../../**/*.{png,jpg,jpeg,webp,avif}",
-			"!../../content/posts/images/*.{png,jpg,jpeg,webp,avif}",
+			"../../**/*.{png,jpg,jpeg,webp,avif,PNG,JPG,JPEG,WEBP,AVIF}",
+			"!../../content/posts/images/*.{png,jpg,jpeg,webp,avif,PNG,JPG,JPEG,WEBP,AVIF}",
 		],
 		{
 			import: "default",
@@ -68,7 +68,13 @@ if (isLocal) {
 	const normalizedPath = path
 		.normalize(path.join("../../", basePath, src))
 		.replace(/\\/g, "/");
-	const file = files[normalizedPath];
+	
+	let file = files[normalizedPath];
+	if (!file) {
+		const backslashPath = normalizedPath.replace(/\//g, "\\");
+		file = files[backslashPath];
+	}
+	
 	if (file) {
 		img = await file();
 	} else {
@@ -85,8 +91,8 @@ const isFallbackPublic = fallbackPath?.startsWith("/");
 if (fallbackPath && !isLocal && !isFallbackPublic) {
 	const files = import.meta.glob<ImageMetadata>(
 		[
-			"../../**/*.{png,jpg,jpeg,webp,avif}",
-			"!../../content/posts/images/*.{png,jpg,jpeg,webp,avif}",
+			"../../**/*.{png,jpg,jpeg,webp,avif,PNG,JPG,JPEG,WEBP,AVIF}",
+			"!../../content/posts/images/*.{png,jpg,jpeg,webp,avif,PNG,JPG,JPEG,WEBP,AVIF}",
 		],
 		{
 			import: "default",
