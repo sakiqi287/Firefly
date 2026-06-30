@@ -2,6 +2,7 @@
 title: "阿格莱雅泳装"
 published: 2026-06-30
 image: ./images/1_10_compressed.jpg
+tags: ["Machi马吉"]
 ---
 
 阿格莱雅泳装
