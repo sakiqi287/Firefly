@@ -2,7 +2,6 @@
 title: "黑江雫"
 published: 2026-06-29
 image: ./images/1_22_compressed.jpg
-pinned: true
 ---
 
 黑江雫
