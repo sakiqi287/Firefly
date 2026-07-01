@@ -3,7 +3,6 @@ title: "红苹果"
 published: 2026-06-29
 image: ./images/IMG_4117_compressed.JPG
 tags: ["蜜汁猫裘"]
-pinned: true
 ---
 
 红苹果

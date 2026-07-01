@@ -3,7 +3,6 @@ title: "碧蓝航线 能代舞娘"
 published: 2026-06-29
 image: ./images/1_48_compressed.jpg
 tags: ["清水由乃"]
-pinned: true
 ---
 
 碧蓝航线 能代舞娘
