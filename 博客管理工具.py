@@ -228,7 +228,7 @@ def apply_modern_style(root):
     
     style.configure('TCheckbutton',
         background=COLORS['bg'],
-        foreground=COLORS['text'],
+        foreground=COLORS['text'], 
         font=('Microsoft YaHei UI', 10)
     )
     
