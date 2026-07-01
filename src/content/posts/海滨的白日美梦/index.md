@@ -1,14 +1,14 @@
 ---
 title: "海滨的白日美梦"
 published: 2026-07-01
-image: ./images/009.jpg
+image: ./images/009_compressed.jpg
 tags: ["是一只熊仔吗"]
 pinned: true
 ---
 
 海滨的白日美梦
 
-![049.jpg](./images/049.jpg)
+![043_compressed.jpg](./images/043_compressed.jpg)
 
 内容合集在此分享文件：2026.07
 链接：https://pan.xunlei.com/s/VOwQTs81oBlaGpEiFQDByJ72A1
