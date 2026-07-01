@@ -3,7 +3,6 @@ title: "丰川祥子"
 published: 2026-06-30
 image: ./images/140.jpg
 tags: ["白栎"]
-pinned: true
 ---
 
 丰川祥子
