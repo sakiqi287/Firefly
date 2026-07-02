@@ -1,20 +1,9 @@
-name: Deploy to GitHub Pages
+name: Deploy to Cloudflare Pages
 
 on:
   push:
     branches: [ main, master ]
   workflow_dispatch:
-
-# Pages 部署需要的权限
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# 确保只有一个部署任务同时运行
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
 
 jobs:
   build:
@@ -39,22 +28,11 @@ jobs:
       
       - name: Build site
         run: pnpm run build
-
-      - name: Create .nojekyll file
-        run: touch dist/.nojekyll
       
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
         with:
-          path: dist  # Astro默认构建输出目录
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: huiyu
+          directory: dist
