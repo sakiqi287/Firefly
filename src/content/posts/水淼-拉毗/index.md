@@ -1,5 +1,5 @@
 ---
-title: "水淼 拉毗"
+title: "拉毗"
 published: 2026-07-02
 image: ./images/Rapi_12.jpg
 tags: ["水淼"]
