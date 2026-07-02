@@ -3,7 +3,6 @@ title: "海滨的白日美梦"
 published: 2026-07-01
 image: ./images/009_compressed.jpg
 tags: ["是一只熊仔吗"]
-pinned: true
 ---
 
 海滨的白日美梦
