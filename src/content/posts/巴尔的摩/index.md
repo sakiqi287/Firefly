@@ -3,7 +3,6 @@ title: "巴尔的摩"
 published: 2026-06-30
 image: ./images/35_compressed.jpg
 tags: ["咬一口兔娘"]
-pinned: true
 ---
 
 巴尔的摩
