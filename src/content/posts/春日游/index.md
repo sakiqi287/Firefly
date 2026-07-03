@@ -3,7 +3,6 @@ title: "春日游"
 published: 2026-07-01
 image: ./images/1_37_compressed.jpg
 tags: ["邦尼"]
-pinned: true
 ---
 
 春日游
