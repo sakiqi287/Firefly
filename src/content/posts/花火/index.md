@@ -1,11 +1,14 @@
 ---
 title: "花火"
-published: 2026-07-03
-image: ./images/1_8_.jpg
+published: 2026-07-1
+image: ./images/1_47_.jpg
 tags: ["Machi马吉"]
 ---
 
 花火
+
+![1_11_.jpg](./images/1_11_.jpg)
+
 
 
 内容合集在此分享文件：2026.07.3.1
