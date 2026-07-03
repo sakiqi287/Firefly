@@ -7,7 +7,6 @@ tags: ["Machi马吉"]
 
 花火
 
-![1_47_.jpg](./images/1_47_.jpg)
 
 内容合集在此分享文件：2026.07.3.1
 链接：https://pan.xunlei.com/s/VOw_eayGsV86P_TtUb02PZPIA1#
