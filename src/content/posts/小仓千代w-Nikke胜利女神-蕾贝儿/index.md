@@ -1,5 +1,5 @@
 ---
-title: "小仓千代w Nikke胜利女神 蕾贝儿"
+title: "Nikke胜利女神 蕾贝儿"
 published: 2026-07-03
 image: ./images/1_8_.jpg
 tags: ["小仓千代w"]
