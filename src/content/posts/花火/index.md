@@ -1,6 +1,6 @@
 ---
 title: "花火"
-published: 2026-07-1
+published: 2026-07-01
 image: ./images/1_47_.jpg
 tags: ["Machi马吉"]
 ---
