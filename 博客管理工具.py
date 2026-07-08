@@ -768,9 +768,7 @@ class BlogManagerApp:
     
     def git_push(self):
         project_dir = os.path.dirname(POSTS_DIR)
-        commit_msg = simpledialog.askstring("提交信息", "请输入提交信息:")
-        if not commit_msg:
-            return
+        commit_msg = "update"
         
         log_dialog = tk.Toplevel(self.root)
         log_dialog.title("Git 推送")
