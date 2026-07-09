@@ -92,8 +92,8 @@ let logoImg: ImageMetadata | null = null;
 if (isLocalSrcLogo) {
 	const files = import.meta.glob<ImageMetadata>(
 		[
-			"../../**/*.{png,jpg,jpeg,webp,avif,gif,svg}",
-			"!../../content/posts/images/*.{png,jpg,jpeg,webp,avif,gif,svg}",
+			"../../**/*.{png,jpg,jpeg,webp,avif,gif,svg,PNG,JPG,JPEG,WEBP,AVIF,GIF,SVG}",
+			"!../../content/posts/images/*.{png,jpg,jpeg,webp,avif,gif,svg,PNG,JPG,JPEG,WEBP,AVIF,GIF,SVG}",
 		],
 		{ import: "default" },
 	);
