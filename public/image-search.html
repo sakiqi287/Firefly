@@ -298,63 +298,30 @@
             searchBtnText.innerHTML = '<span class="loading"></span> 上传图片中...';
 
             try {
-                const imageUrl = await uploadImage(selectedFile);
-                const googleLensUrl = 'https://lens.google.com/uploadbyurl?url=' + encodeURIComponent(imageUrl);
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+
+                const response = await fetch('/api/image-search', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || '图片上传失败');
+                }
+
+                const googleLensUrl = 'https://lens.google.com/uploadbyurl?url=' + encodeURIComponent(data.url);
                 window.open(googleLensUrl, '_blank');
             } catch (error) {
                 console.error(error);
-                alert('搜索失败：' + (error.message || '请检查网络连接，或尝试更换网络环境'));
+                alert('搜索失败：' + (error.message || '请检查网络连接'));
             } finally {
                 searchBtn.disabled = false;
                 searchBtnText.textContent = '搜索图片';
             }
         });
-
-        async function uploadImage(file) {
-            let lastError = null;
-
-            // 方案1：Telegraph 图床
-            try {
-                const formData = new FormData();
-                formData.append('file', file);
-
-                const response = await fetch('https://telegra.ph/upload', {
-                    method: 'POST',
-                    body: formData,
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    if (Array.isArray(data) && data[0] && data[0].src) {
-                        return 'https://telegra.ph' + data[0].src;
-                    }
-                }
-            } catch (error) {
-                lastError = error;
-            }
-
-            // 方案2：0x0.st 图床
-            try {
-                const formData = new FormData();
-                formData.append('file', file);
-
-                const response = await fetch('https://0x0.st', {
-                    method: 'POST',
-                    body: formData,
-                });
-
-                if (response.ok) {
-                    const text = (await response.text()).trim();
-                    if (text && text.startsWith('http')) {
-                        return text;
-                    }
-                }
-            } catch (error) {
-                lastError = error;
-            }
-
-            throw lastError || new Error('图片上传失败，请检查网络连接');
-        }
     </script>
 </body>
 </html>

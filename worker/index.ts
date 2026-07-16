@@ -1,5 +1,5 @@
 interface Env {
-	ASSETS: Fetcher;
+	ASSETS?: Fetcher;
 }
 
 export default {
@@ -46,17 +46,24 @@ export default {
 			}
 		}
 
-		return env.ASSETS.fetch(request);
+		if (env.ASSETS) {
+			return env.ASSETS.fetch(request);
+		}
+
+		return new Response("Not Found", { status: 404 });
 	},
 } satisfies ExportedHandler<Env>;
 
 async function uploadImage(file: File): Promise<string> {
+	const fileWithType = new File([await file.arrayBuffer()], file.name, {
+		type: file.type || "image/png",
+	});
 	let lastError: Error | null = null;
 
 	// 方案1：Telegraph 图床
 	try {
 		const uploadFormData = new FormData();
-		uploadFormData.append("file", file);
+		uploadFormData.append("file", fileWithType);
 
 		const response = await fetch("https://telegra.ph/upload", {
 			method: "POST",
@@ -76,7 +83,7 @@ async function uploadImage(file: File): Promise<string> {
 	// 方案2：0x0.st 图床
 	try {
 		const uploadFormData = new FormData();
-		uploadFormData.append("file", file);
+		uploadFormData.append("file", fileWithType);
 
 		const response = await fetch("https://0x0.st", {
 			method: "POST",
