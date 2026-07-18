@@ -370,8 +370,7 @@ class BlogManagerApp:
                             j = i + 1
                             while j < len(lines) and not array_content.endswith(']'):
                                 array_content += '\n' + lines[j].strip()
-                                j += 1
-                            i = j
+                                j += a
                             value = array_content
                         elif value.startswith('"') and not value.endswith('"'):
                             str_content = value
