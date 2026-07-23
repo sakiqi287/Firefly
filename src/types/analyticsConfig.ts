@@ -23,4 +23,7 @@ export type AnalyticsConfig = {
 		hashMode?: boolean; // 单页面应用统计（Vue/React 等），默认 false
 		screenRecord?: boolean; // 开启网站录屏功能，默认 true
 	};
+	cloudflareAnalytics?: {
+		token?: string; // Cloudflare Web Analytics Token
+	};
 };

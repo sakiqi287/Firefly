@@ -157,6 +157,9 @@ const relatedPosts = await getRelatedPosts(entry, 5);
   <!-- KaTeX 按需加载 - 仅在文章页面 -->
   <KatexManager slot="head" />
   
+  <!-- 不蒜子访问量统计 -->
+  <script is:inline slot="head" async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  
   <script
     is:inline
     slot="head"
