@@ -46,8 +46,4 @@ export const analyticsConfig: AnalyticsConfig = {
 		// 是否开启网站录屏功能
 		screenRecord: true,
 	},
-	// Cloudflare Web Analytics 配置
-	cloudflareAnalytics: {
-		token: "e24a286393bb494e972060440099d3b6",
-	},
 };

@@ -3,7 +3,6 @@ import GoogleAnalytics from "@components/analytics/GoogleAnalytics.astro";
 import La51Analytics from "@components/analytics/La51Analytics.astro";
 import MicrosoftClarity from "@components/analytics/MicrosoftClarity.astro";
 import UmamiAnalytics from "@components/analytics/UmamiAnalytics.astro";
-import CloudflareAnalytics from "@components/analytics/CloudflareAnalytics.astro";
 import FancyboxManager from "@components/features/FancyboxManager.astro";
 import FontManager from "@components/features/FontManager.astro";
 import MusicManager from "@components/features/MusicManager.astro";
@@ -118,9 +117,6 @@ const siteLang = lang.replace("_", "-");
             hashMode={analyticsConfig.la51Analytics?.hashMode}
             screenRecord={analyticsConfig.la51Analytics?.screenRecord}
             />
-    )}
-    {analyticsConfig?.cloudflareAnalytics?.token && (
-            <CloudflareAnalytics token={analyticsConfig.cloudflareAnalytics.token} />
     )}
 
     <title>{pageTitle}</title>
