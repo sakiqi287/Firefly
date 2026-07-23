@@ -48,7 +48,6 @@ export const analyticsConfig: AnalyticsConfig = {
 	},
 	// Cloudflare Web Analytics 配置
 	cloudflareAnalytics: {
-		// Cloudflare Web Analytics Token，在 Cloudflare Dashboard → Analytics → Web Analytics 中获取
-		token: "",
+		token: "e24a286393bb494e972060440099d3b6",
 	},
 };
