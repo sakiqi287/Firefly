@@ -1,7 +1,7 @@
 ---
 title: "女教师の课后双人"
 published: 2026-07-24
-image: ./images/2f28eef139252546e5de66fde05bb21e.jpg
+image: ./images/cf13c1b0913db63905a4426213a1e091_720.jpg
 tags: ["啾啾"]
 ---
 
