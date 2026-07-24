@@ -4,5 +4,11 @@
 	"compatibility_date": "2024-01-01",
 	"assets": {
 		"directory": "./dist"
-	}
+	},
+	"kv_namespaces": [
+		{
+			"binding": "PAGE_VIEWS",
+			"id": "a7ef8b83f20f4c6f86a9c6d41d3d5e9c"
+		}
+	]
 }

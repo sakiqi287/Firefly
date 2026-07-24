@@ -127,7 +127,7 @@ const path = customPath || (id ? `/posts/${id}` : "");
      )
    }
 
-  <!-- 不蒜子访问量统计（首页不显示） -->
+  <!-- 自建浏览量统计（首页不显示） -->
   {
     !isHome && id && (
       <div class="flex items-center">
@@ -141,7 +141,7 @@ const path = customPath || (id ? `/posts/${id}` : "");
           {i18n(I18nKey.pageViews)}
         </span>
         <span class="text-50 text-sm font-medium">
-          <span id="busuanzi_value_page_pv">0</span>
+          <span class="cf-views-count" data-slug={id}>0</span>
         </span>
       </div>
     )

@@ -1,5 +1,7 @@
 interface Env {
 	ASSETS?: Fetcher;
+	// 浏览量计数器 KV 命名空间
+	PAGE_VIEWS: KVNamespace;
 }
 
 export default {
@@ -7,7 +9,7 @@ export default {
 		const url = new URL(request.url);
 		const corsHeaders = {
 			"Access-Control-Allow-Origin": "*",
-			"Access-Control-Allow-Methods": "POST, OPTIONS",
+			"Access-Control-Allow-Methods": "GET, POST, OPTIONS",
 			"Access-Control-Allow-Headers": "Content-Type",
 		};
 
@@ -15,6 +17,17 @@ export default {
 			return new Response(null, { headers: corsHeaders });
 		}
 
+		// ============ 浏览量计数器 API ============
+		// POST /api/views/hit?slug=xxx  增加一次浏览量（同一会话内只计一次）
+		// GET  /api/views/get?slug=xxx  获取当前浏览量
+		if (url.pathname === "/api/views/hit" && request.method === "POST") {
+			return handleViewHit(request, env, url, corsHeaders);
+		}
+		if (url.pathname === "/api/views/get" && request.method === "GET") {
+			return handleViewGet(request, env, url, corsHeaders);
+		}
+
+		// ============ 图片搜索 API（保留） ============
 		if (url.pathname === "/api/image-search" && request.method === "POST") {
 			try {
 				const formData = await request.formData();
@@ -53,6 +66,87 @@ export default {
 		return new Response("Not Found", { status: 404 });
 	},
 } satisfies ExportedHandler<Env>;
+
+// 浏览量 KV key 前缀
+const VIEW_KEY_PREFIX = "view:";
+// 会话去重 key 前缀（30 分钟内同一 slug 不重复计数）
+const SESSION_KEY_PREFIX = "session:";
+// 会话去重时长（秒）
+const SESSION_TTL = 30 * 60;
+// KV 写后异步广播更新最近浏览量（可选，简化实现暂不启用）
+
+// 获取客户端 IP（Cloudflare 提供）
+function getClientIp(request: Request): string {
+	const cfIp = request.headers.get("cf-connecting-ip");
+	if (cfIp) return cfIp;
+	const xRealIp = request.headers.get("x-real-ip");
+	if (xRealIp) return xRealIp;
+	return "unknown";
+}
+
+async function handleViewHit(
+	request: Request,
+	env: Env,
+	url: URL,
+	corsHeaders: Record<string, string>,
+): Promise<Response> {
+	const slug = url.searchParams.get("slug");
+	if (!slug) {
+		return jsonResponse({ error: "missing slug" }, 400, corsHeaders);
+	}
+	// 校验 slug 格式（防止 KV key 注入）
+	if (!/^[A-Za-z0-9_\-\.]+$/.test(slug) || slug.length > 200) {
+		return jsonResponse({ error: "invalid slug" }, 400, corsHeaders);
+	}
+
+	const ip = getClientIp(request);
+	const sessionKey = `${SESSION_KEY_PREFIX}${slug}:${ip}`;
+	// 会话去重：30 分钟内同一 IP 对同一文章只计一次
+	const existed = await env.PAGE_VIEWS.get(sessionKey);
+	if (existed) {
+		const current = await env.PAGE_VIEWS.get(`${VIEW_KEY_PREFIX}${slug}`);
+		return jsonResponse({ slug, views: Number(current) || 0, counted: false }, 200, corsHeaders);
+	}
+
+	// 写入去重标记
+	await env.PAGE_VIEWS.put(sessionKey, "1", { expirationTtl: SESSION_TTL });
+
+	// 自增浏览量（使用 get + put 简单实现，足够个人博客规模）
+	const viewKey = `${VIEW_KEY_PREFIX}${slug}`;
+	const current = Number((await env.PAGE_VIEWS.get(viewKey)) || 0);
+	const next = current + 1;
+	await env.PAGE_VIEWS.put(viewKey, String(next));
+
+	return jsonResponse({ slug, views: next, counted: true }, 200, corsHeaders);
+}
+
+async function handleViewGet(
+	_request: Request,
+	env: Env,
+	url: URL,
+	corsHeaders: Record<string, string>,
+): Promise<Response> {
+	const slug = url.searchParams.get("slug");
+	if (!slug) {
+		return jsonResponse({ error: "missing slug" }, 400, corsHeaders);
+	}
+	if (!/^[A-Za-z0-9_\-\.]+$/.test(slug) || slug.length > 200) {
+		return jsonResponse({ error: "invalid slug" }, 400, corsHeaders);
+	}
+	const current = Number((await env.PAGE_VIEWS.get(`${VIEW_KEY_PREFIX}${slug}`)) || 0);
+	return jsonResponse({ slug, views: current }, 200, corsHeaders);
+}
+
+function jsonResponse(
+	body: unknown,
+	status: number,
+	corsHeaders: Record<string, string>,
+): Response {
+	return new Response(JSON.stringify(body), {
+		status,
+		headers: { "Content-Type": "application/json", ...corsHeaders },
+	});
+}
 
 async function uploadImage(file: File): Promise<string> {
 	const fileWithType = new File([await file.arrayBuffer()], file.name, {

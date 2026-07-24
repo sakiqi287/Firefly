@@ -7,5 +7,19 @@ compatibility_date = "2024-01-01"
 [assets]
 directory = "./dist"
 
+# 浏览量计数器 KV 绑定
+# 注意：首次部署前，请先在 Cloudflare Dashboard 中创建 KV 命名空间：
+# 1. 进入 Workers & Pages -> KV -> Create a namespace
+# 2. 命名空间名称建议为：PAGE_VIEWS
+# 3. 创建后把下方的 id 替换为实际的 namespace id
+# 4. 也可以使用 `pnpm wrangler kv:namespace create PAGE_VIEWS` 自动创建并获取 id
+[[kv_namespaces]]
+binding = "PAGE_VIEWS"
+id = "a7ef8b83f20f4c6f86a9c6d41d3d5e9c"
+
+# 构建配置
+[build]
+command = "pnpm run build"
+
 [vars]
 NODE_VERSION = "22"
