@@ -94,8 +94,8 @@ async function handleViewHit(
 	if (!slug) {
 		return jsonResponse({ error: "missing slug" }, 400, corsHeaders);
 	}
-	// 校验 slug 格式（防止 KV key 注入）
-	if (!/^[A-Za-z0-9_\-\.]+$/.test(slug) || slug.length > 200) {
+	// 校验 slug 格式（防止 KV key 注入，限制不能包含 :）
+	if (!slug || slug.length > 200 || /[:\s]/.test(slug)) {
 		return jsonResponse({ error: "invalid slug" }, 400, corsHeaders);
 	}
 
@@ -130,7 +130,7 @@ async function handleViewGet(
 	if (!slug) {
 		return jsonResponse({ error: "missing slug" }, 400, corsHeaders);
 	}
-	if (!/^[A-Za-z0-9_\-\.]+$/.test(slug) || slug.length > 200) {
+	if (!slug || slug.length > 200 || /[:\s]/.test(slug)) {
 		return jsonResponse({ error: "invalid slug" }, 400, corsHeaders);
 	}
 	const current = Number((await env.PAGE_VIEWS.get(`${VIEW_KEY_PREFIX}${slug}`)) || 0);
