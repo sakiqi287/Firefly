@@ -1,15 +1,14 @@
 # Cloudflare Workers 配置 - 用于部署静态网站
 name = "huiyu"
 main = "./worker/index.ts"
-compatibility_date = "2024-01-01"
+compatibility_date = "2025-01-01"
+node_compat = true
 
 # 静态资源配置
 [assets]
 directory = "./dist"
 
 # 浏览量计数器 KV 绑定
-# 在 GitHub Actions CI 中部署时，需要同时提供 id 和 preview_id
-# preview_id 用于本地开发和 CI 预览环境，可以留空
 [[kv_namespaces]]
 binding = "PAGE_VIEWS"
 id = "a7ef8b83f20f4c6f86a9c6d41d3d5e9c"
