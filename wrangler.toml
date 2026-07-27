@@ -2,7 +2,7 @@
 name = "huiyu"
 main = "./worker/index.ts"
 compatibility_date = "2025-01-01"
-node_compat = true
+compatibility_flags = ["nodejs_compat"]
 
 # 静态资源配置
 [assets]
