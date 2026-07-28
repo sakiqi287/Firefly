@@ -90,34 +90,35 @@ async function handleViewHit(
 	url: URL,
 	corsHeaders: Record<string, string>,
 ): Promise<Response> {
-	const slug = url.searchParams.get("slug");
-	if (!slug) {
-		return jsonResponse({ error: "missing slug" }, 400, corsHeaders);
+	try {
+		const slug = url.searchParams.get("slug");
+		if (!slug) {
+			return jsonResponse({ error: "missing slug" }, 400, corsHeaders);
+		}
+		if (slug.length > 200 || /[:\s]/.test(slug)) {
+			return jsonResponse({ error: "invalid slug" }, 400, corsHeaders);
+		}
+
+		const ip = getClientIp(request);
+		const sessionKey = `${SESSION_KEY_PREFIX}${slug}:${ip}`;
+		const existed = await env.PAGE_VIEWS.get(sessionKey);
+		if (existed) {
+			const current = await env.PAGE_VIEWS.get(`${VIEW_KEY_PREFIX}${slug}`);
+			return jsonResponse({ slug, views: Number(current) || 0, counted: false }, 200, corsHeaders);
+		}
+
+		await env.PAGE_VIEWS.put(sessionKey, "1", { expirationTtl: SESSION_TTL });
+
+		const viewKey = `${VIEW_KEY_PREFIX}${slug}`;
+		const current = Number((await env.PAGE_VIEWS.get(viewKey)) || 0);
+		const next = current + 1;
+		await env.PAGE_VIEWS.put(viewKey, String(next));
+
+		return jsonResponse({ slug, views: next, counted: true }, 200, corsHeaders);
+	} catch (e: unknown) {
+		const msg = e instanceof Error ? e.message : String(e);
+		return jsonResponse({ error: "hit failed", detail: msg }, 500, corsHeaders);
 	}
-	// 校验 slug 格式（防止 KV key 注入，限制不能包含 :）
-	if (!slug || slug.length > 200 || /[:\s]/.test(slug)) {
-		return jsonResponse({ error: "invalid slug" }, 400, corsHeaders);
-	}
-
-	const ip = getClientIp(request);
-	const sessionKey = `${SESSION_KEY_PREFIX}${slug}:${ip}`;
-	// 会话去重：30 分钟内同一 IP 对同一文章只计一次
-	const existed = await env.PAGE_VIEWS.get(sessionKey);
-	if (existed) {
-		const current = await env.PAGE_VIEWS.get(`${VIEW_KEY_PREFIX}${slug}`);
-		return jsonResponse({ slug, views: Number(current) || 0, counted: false }, 200, corsHeaders);
-	}
-
-	// 写入去重标记
-	await env.PAGE_VIEWS.put(sessionKey, "1", { expirationTtl: SESSION_TTL });
-
-	// 自增浏览量（使用 get + put 简单实现，足够个人博客规模）
-	const viewKey = `${VIEW_KEY_PREFIX}${slug}`;
-	const current = Number((await env.PAGE_VIEWS.get(viewKey)) || 0);
-	const next = current + 1;
-	await env.PAGE_VIEWS.put(viewKey, String(next));
-
-	return jsonResponse({ slug, views: next, counted: true }, 200, corsHeaders);
 }
 
 async function handleViewGet(

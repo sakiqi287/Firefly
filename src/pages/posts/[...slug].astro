@@ -161,35 +161,46 @@ const relatedPosts = await getRelatedPosts(entry, 5);
   <script is:inline slot="head" define:vars={{ postSlug: entry.id }}>
     (function () {
       if (!postSlug) return;
-      // Swup 页面切换后重新执行
+      function updateViewCount(slug, views) {
+        document.querySelectorAll('.cf-views-count[data-slug]').forEach(function (el) {
+          if (el.getAttribute('data-slug') === slug) {
+            el.textContent = String(views);
+          }
+        });
+      }
       function run() {
-        var els = document.querySelectorAll('.cf-views-count[data-slug]');
-        if (!els.length) return;
         var slug = postSlug;
+        if (!document.querySelector('.cf-views-count[data-slug="' + slug + '"]')) return;
         fetch('/api/views/hit?slug=' + encodeURIComponent(slug), {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
         })
-          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (r) {
+            if (r.ok) return r.json();
+            throw new Error('hit failed');
+          })
           .then(function (data) {
-            if (!data || typeof data.views !== 'number') return;
-            els.forEach(function (el) {
-              if (el.getAttribute('data-slug') === slug) {
-                el.textContent = String(data.views);
-              }
-            });
+            if (data && typeof data.views === 'number') {
+              updateViewCount(slug, data.views);
+            } else {
+              throw new Error('no views');
+            }
           })
           .catch(function () {
-            // 静默失败：保留默认 0
+            fetch('/api/views/get?slug=' + encodeURIComponent(slug))
+              .then(function (r) { return r.ok ? r.json() : null; })
+              .then(function (data) {
+                if (data && typeof data.views === 'number') {
+                  updateViewCount(slug, data.views);
+                }
+              })
+              .catch(function () {});
           });
       }
-      // 首次加载执行
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', run);
       } else {
         run();
       }
-      // Swup 页面切换后重新执行（如果页面被缓存）
       if (window.swup) {
         window.swup.hooks.on('page:view', run);
       }
