@@ -3,7 +3,6 @@ title: "夜明"
 published: 2026-07-17
 image: ./images/393f75fb380d0d2a0b36f810018984fb_720.jpg
 tags: ["星之迟迟"]
-pinned: true
 ---
 
 星之迟迟 - 夜明

@@ -3,7 +3,6 @@ title: "花火148P"
 published: 2026-07-03
 image: ./images/1_8_.jpg
 tags: ["Machi马吉"]
-pinned: true
 ---
 
 花火148P
