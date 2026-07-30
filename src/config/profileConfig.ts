@@ -24,7 +24,7 @@ export const profileConfig: ProfileConfig = {
 		{
 			name: "qq",
 			icon: "fa7-brands:qq",
-			url: "https://qm.qq.com/q/DgxONg10ru",
+			url: "https://qm.qq.com/q/YNgCmEyUQq",
 			showName: false,
 		},
 	],
