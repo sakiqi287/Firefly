@@ -12,7 +12,7 @@ export const siteConfig: SiteConfig = {
 	subtitle: "Demo site",
 
 	// 站点 URL
-	site_url: "https://huiyu.xx376y.top",
+	site_url: "https://huiyuzi.top",
 
 	// 站点描述
 	description:
