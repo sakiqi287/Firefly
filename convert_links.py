@@ -109,7 +109,8 @@ def convert_post(md_path):
     # 在第一张封面图后插入按钮
     parts = new_content.split('---', 2)
     if len(parts) >= 3:
-        fm = parts[0]
+        fm_start = parts[0]
+        fm_body = parts[1]
         after_fm = parts[2]
         img_match = re.search(r'!\[.*?\]\(.*?\)', after_fm)
         if img_match:
@@ -121,7 +122,7 @@ def convert_post(md_path):
             after_fm_new = after_fm[:insert_pos] + '\n\n' + buttons_html + '\n\n' + after_fm[insert_pos:].lstrip('\n')
         else:
             after_fm_new = '\n' + buttons_html + '\n\n' + after_fm.lstrip('\n')
-        final_content = fm + '---' + after_fm_new
+        final_content = fm_start + '---' + fm_body + '---' + after_fm_new
     else:
         final_content = new_content + '\n\n' + buttons_html + '\n'
 

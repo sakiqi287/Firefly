@@ -1,4 +1,9 @@
 ---
+title: "鸣潮尤诺"
+published: 2026-06-22
+image: ./images/1_11_.jpg
+tags: ["爱莉"]
+---
 
 鸣潮尤诺
 
