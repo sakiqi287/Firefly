@@ -699,15 +699,86 @@ class BlogManagerApp:
             content_text.insert(tk.INSERT, f"[{text}]({url})")
         
         def insert_cloud_link():
-            url = simpledialog.askstring("插入网盘链接", "请输入网盘链接:")
-            if not url:
-                return
-            pwd = simpledialog.askstring("插入网盘链接", "请输入提取码（可留空）:") or ""
-            text = "网盘下载"
-            if pwd:
-                content_text.insert(tk.INSERT, f"[{text}]({url})  提取码：{pwd}\n\n")
-            else:
-                content_text.insert(tk.INSERT, f"[{text}]({url})\n\n")
+            dialog = tk.Toplevel(self.root)
+            dialog.title("插入网盘链接")
+            dialog.geometry("420x220")
+            dialog.configure(bg=COLORS['bg'])
+            dialog.transient(self.root)
+            dialog.grab_set()
+            dialog.resizable(False, False)
+            
+            ttk.Label(dialog, text="选择或输入网盘链接:", style='CardTitle.TLabel').pack(pady=(20, 5))
+            
+            url_frame = ttk.Frame(dialog, style='TFrame')
+            url_frame.pack(padx=20, pady=10, fill=tk.X)
+            
+            url_var = tk.StringVar()
+            url_combo = ttk.Combobox(url_frame, textvariable=url_var, width=40, font=('Microsoft YaHei UI', 10))
+            url_combo.pack(fill=tk.X)
+            url_combo['values'] = [
+                "https://pan.xunlei.com/s/",
+                "https://pan.quark.cn/s/",
+            ]
+            
+            ttk.Label(dialog, text="提取码 (可选):", style='CardTitle.TLabel').pack(pady=(10, 5))
+            
+            pwd_frame = ttk.Frame(dialog, style='TFrame')
+            pwd_frame.pack(padx=20, pady=5, fill=tk.X)
+            pwd_var = tk.StringVar()
+            ttk.Entry(pwd_frame, textvariable=pwd_var, width=40).pack(fill=tk.X)
+            
+            def on_ok():
+                url = url_var.get().strip()
+                if not url:
+                    messagebox.showwarning("提示", "请选择或输入链接", parent=dialog)
+                    return
+                url = url.rstrip('#')
+                pwd = pwd_var.get().strip()
+                
+                btns = []
+                if 'pan.xunlei.com' in url:
+                    btns.append(
+                        f'<a href="{url}" target="_blank" rel="noopener noreferrer" '
+                        f'style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;'
+                        f'background:linear-gradient(135deg,#2196F3,#1976D2);color:#fff;border-radius:8px;'
+                        f'text-decoration:none;font-weight:600;box-shadow:0 2px 8px rgba(33,150,243,0.3);'
+                        f'transition:transform .2s,box-shadow .2s;" '
+                        f'onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 4px 12px rgba(33,150,243,0.4)\'" '
+                        f'onmouseout="this.style.transform=\'translateY(0)\';this.style.boxShadow=\'0 2px 8px rgba(33,150,243,0.3)\'">'
+                        f'<span>🌩️</span><span>迅雷下载</span></a>'
+                    )
+                elif 'pan.quark.cn' in url:
+                    btns.append(
+                        f'<a href="{url}" target="_blank" rel="noopener noreferrer" '
+                        f'style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;'
+                        f'background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:8px;'
+                        f'text-decoration:none;font-weight:600;box-shadow:0 2px 8px rgba(102,126,234,0.3);'
+                        f'transition:transform .2s,box-shadow .2s;" '
+                        f'onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 4px 12px rgba(102,126,234,0.4)\'" '
+                        f'onmouseout="this.style.transform=\'translateY(0)\';this.style.boxShadow=\'0 2px 8px rgba(102,126,234,0.3)\'">'
+                        f'<span>🌀</span><span>夸克下载</span></a>'
+                    )
+                else:
+                    text = "网盘下载"
+                    if pwd:
+                        content_text.insert(tk.INSERT, f"[{text}]({url})  提取码：{pwd}\n\n")
+                    else:
+                        content_text.insert(tk.INSERT, f"[{text}]({url})\n\n")
+                    dialog.destroy()
+                    return
+
+                html = '<div style="display:flex;gap:12px;flex-wrap:wrap;margin:16px 0;">' + ''.join(btns) + '</div>'
+                if pwd:
+                    html += f'\n<p style="margin-top:8px;color:#666;font-size:14px;">提取码：<code style="background:#f5f5f5;padding:2px 8px;border-radius:4px;">{pwd}</code></p>'
+                content_text.insert(tk.INSERT, html + '\n\n')
+                dialog.destroy()
+            
+            btn_frame = ttk.Frame(dialog, style='TFrame')
+            btn_frame.pack(pady=15)
+            ttk.Button(btn_frame, text="取消", command=dialog.destroy).pack(side=tk.LEFT, padx=10)
+            ttk.Button(btn_frame, text="确定", command=on_ok, style='Primary.TButton').pack(side=tk.LEFT, padx=10)
+            
+            url_combo.focus_set()
         
         ttk.Button(toolbar, text="🖼️ 插入图片", command=insert_image).pack(side=tk.LEFT, padx=(0, 6))
         ttk.Button(toolbar, text="🔗 插入链接", command=insert_link).pack(side=tk.LEFT, padx=6)
