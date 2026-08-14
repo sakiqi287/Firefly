@@ -1,9 +1,4 @@
 ---
-title: "新春甘雨申鹤"
-published: 2026-06-26
-image: ./images/1_9_.JPG
-tags: ["九言"]
----
 
 新春甘雨申鹤
 
@@ -12,5 +7,6 @@ tags: ["九言"]
 
 
 内容合集在此
-链接：https://pan.xunlei.com/s/VOw2BB65g_A4_0LyBkbO1T3qA1#
-提取码：pic4
+
+
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin:16px 0;"><a href="https://pan.xunlei.com/s/VOw2BB65g_A4_0LyBkbO1T3qA1" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:linear-gradient(135deg,#2196F3,#1976D2);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 2px 8px rgba(33,150,243,0.3);transition:transform .2s,box-shadow .2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(33,150,243,0.4)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(33,150,243,0.3)'"><span>🌩️</span><span>迅雷下载</span></a></div>

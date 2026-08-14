@@ -1,15 +1,8 @@
 ---
-title: "JUL TIER2"
-published: 2026-08-05
-image: ./images/1_31_.jpg
-tags: ["水淼"]
----
 
 水淼Aqua JUL TIER2
 
 ![1_49_.jpg](./images/1_49_.jpg)
 
-迅雷链接：https://pan.xunlei.com/s/VOzFUlbrBX9MsM8dQSxcm0LEA1#
-提取码：9w3e
 
-夸克链接：https://pan.quark.cn/s/c79e23182408
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin:16px 0;"><a href="https://pan.xunlei.com/s/VOzFUlbrBX9MsM8dQSxcm0LEA1" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:linear-gradient(135deg,#2196F3,#1976D2);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 2px 8px rgba(33,150,243,0.3);transition:transform .2s,box-shadow .2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(33,150,243,0.4)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(33,150,243,0.3)'"><span>🌩️</span><span>迅雷下载</span></a><a href="https://pan.quark.cn/s/c79e23182408" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 2px 8px rgba(102,126,234,0.3);transition:transform .2s,box-shadow .2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(102,126,234,0.4)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(102,126,234,0.3)'"><span>🌀</span><span>夸克下载</span></a></div>

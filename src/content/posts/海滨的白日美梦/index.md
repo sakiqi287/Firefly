@@ -1,9 +1,4 @@
 ---
-title: "海滨的白日美梦"
-published: 2026-07-01
-image: ./images/009_compressed.jpg
-tags: ["是一只熊仔吗"]
----
 
 海滨的白日美梦
 
@@ -11,8 +6,7 @@ tags: ["是一只熊仔吗"]
 
 
 内容合集在此分享文件：2026.07
-链接：https://pan.xunlei.com/s/VOwQdQO13kR6p2uX5GDMWAw8A1#
-提取码：b3at
 复制这段内容后打开迅雷，查看更方便
 
-夸克链接：https://pan.quark.cn/s/a7245882d775
+
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin:16px 0;"><a href="https://pan.xunlei.com/s/VOwQdQO13kR6p2uX5GDMWAw8A1" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:linear-gradient(135deg,#2196F3,#1976D2);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 2px 8px rgba(33,150,243,0.3);transition:transform .2s,box-shadow .2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(33,150,243,0.4)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(33,150,243,0.3)'"><span>🌩️</span><span>迅雷下载</span></a><a href="https://pan.quark.cn/s/a7245882d775" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 2px 8px rgba(102,126,234,0.3);transition:transform .2s,box-shadow .2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(102,126,234,0.4)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(102,126,234,0.3)'"><span>🌀</span><span>夸克下载</span></a></div>
