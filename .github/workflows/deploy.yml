@@ -22,11 +22,35 @@ jobs:
         with:
           run_install: false
 
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/share/pnpm/store/v3
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Cache Astro & build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            .astro
+            dist
+            node_modules/.cache
+            src/constants/lqips.json
+            src/constants/icons.ts
+          key: ${{ runner.os }}-astro-build-${{ hashFiles('**/*.astro', '**/*.ts', '**/*.tsx', '**/*.svelte', '**/*.md', '**/pnpm-lock.yaml', 'src/content/posts/*/images/**') }}
+          restore-keys: |
+            ${{ runner.os }}-astro-build-
 
       - name: Build
         run: pnpm run build
+        env:
+          ASTRO_TELEMETRY_DISABLED: 1
 
       - name: Deploy
         env:
