@@ -702,7 +702,8 @@ class BlogManagerApp:
             pinned = pinned_var.get()
             
             original_content = content
-            content = self._auto_convert_links(content)
+            # 还原为纯文本形式后不再自动转换为按钮
+            # content = self._auto_convert_links(content)
             
             if content != original_content:
                 content_text.delete("1.0", tk.END)
@@ -859,42 +860,16 @@ class BlogManagerApp:
                 url = url.rstrip('#')
                 pwd = pwd_var.get().strip()
                 
-                btns = []
+                lines = []
                 if 'pan.xunlei.com' in url:
-                    btns.append(
-                        f'<a href="{url}" target="_blank" rel="noopener noreferrer" '
-                        f'style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;'
-                        f'background:linear-gradient(135deg,#2196F3,#1976D2);color:#fff;border-radius:8px;'
-                        f'text-decoration:none;font-weight:600;box-shadow:0 2px 8px rgba(33,150,243,0.3);'
-                        f'transition:transform .2s,box-shadow .2s;" '
-                        f'onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 4px 12px rgba(33,150,243,0.4)\'" '
-                        f'onmouseout="this.style.transform=\'translateY(0)\';this.style.boxShadow=\'0 2px 8px rgba(33,150,243,0.3)\'">'
-                        f'<span>🌩️</span><span>迅雷下载</span></a>'
-                    )
+                    lines.append(f"迅雷链接：{url}")
                 elif 'pan.quark.cn' in url:
-                    btns.append(
-                        f'<a href="{url}" target="_blank" rel="noopener noreferrer" '
-                        f'style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;'
-                        f'background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:8px;'
-                        f'text-decoration:none;font-weight:600;box-shadow:0 2px 8px rgba(102,126,234,0.3);'
-                        f'transition:transform .2s,box-shadow .2s;" '
-                        f'onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 4px 12px rgba(102,126,234,0.4)\'" '
-                        f'onmouseout="this.style.transform=\'translateY(0)\';this.style.boxShadow=\'0 2px 8px rgba(102,126,234,0.3)\'">'
-                        f'<span>🌀</span><span>夸克下载</span></a>'
-                    )
+                    lines.append(f"夸克链接：{url}")
                 else:
-                    text = "网盘下载"
-                    if pwd:
-                        content_text.insert(tk.INSERT, f"[{text}]({url})  提取码：{pwd}\n\n")
-                    else:
-                        content_text.insert(tk.INSERT, f"[{text}]({url})\n\n")
-                    dialog.destroy()
-                    return
-
-                html = '<div style="display:flex;gap:12px;flex-wrap:wrap;margin:16px 0;">' + ''.join(btns) + '</div>'
+                    lines.append(f"链接：{url}")
                 if pwd:
-                    html += f'\n<p style="margin-top:8px;color:#666;font-size:14px;">提取码：<code style="background:#f5f5f5;padding:2px 8px;border-radius:4px;">{pwd}</code></p>'
-                content_text.insert(tk.INSERT, html + '\n\n')
+                    lines.append(f"提取码：{pwd}")
+                content_text.insert(tk.INSERT, "\n".join(lines) + "\n\n")
                 dialog.destroy()
             
             btn_frame = ttk.Frame(dialog, style='TFrame')
@@ -1002,9 +977,10 @@ class BlogManagerApp:
         def run_git():
             import threading
             def worker():
-                log_dialog.after(0, lambda: log_text.insert(tk.END, "🔄 正在转换文章中的网盘链接为按钮样式...\n", 'info'))
-                converted = self._batch_convert_links()
-                log_dialog.after(0, lambda: log_text.insert(tk.END, f"   转换完成：更新 {converted} 篇\n\n", 'info'))
+                # 还原为纯文本形式后，不再执行自动批量转换为按钮
+                # log_dialog.after(0, lambda: log_text.insert(tk.END, "🔄 正在转换文章中的网盘链接为按钮样式...\n", 'info'))
+                # converted = self._batch_convert_links()
+                # log_dialog.after(0, lambda: log_text.insert(tk.END, f"   转换完成：更新 {converted} 篇\n\n", 'info'))
                 
                 commands = [
                     ("git add -A", ["git", "-C", project_dir, "add", "-A"]),
