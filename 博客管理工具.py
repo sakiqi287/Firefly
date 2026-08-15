@@ -45,7 +45,8 @@ class BlogManagerApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Firefly 博客管理工具")
-        self.root.geometry("800x600")
+        self.root.geometry("780x520")
+        self.root.minsize(700, 450)
 
         self.posts = []
         self.load_posts()
@@ -64,22 +65,22 @@ class BlogManagerApp:
                         self.posts.append(name)
 
     def create_ui(self):
-        """创建界面"""
-        title_frame = ttk.Frame(self.root)
-        title_frame.pack(fill=tk.X, padx=10, pady=10)
+        """创建界面 - 简洁版"""
+        # 顶部工具栏
+        top_frame = ttk.Frame(self.root)
+        top_frame.pack(fill=tk.X, padx=10, pady=8)
+        ttk.Button(top_frame, text="刷新列表", command=self.refresh_posts).pack(side=tk.RIGHT)
 
-        ttk.Label(title_frame, text="Firefly 博客管理", font=('Arial', 16, 'bold')).pack(side=tk.LEFT)
-        ttk.Button(title_frame, text="刷新列表", command=self.refresh_posts).pack(side=tk.RIGHT)
-
+        # 文章列表
         list_frame = ttk.Frame(self.root)
-        list_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
-
-        ttk.Label(list_frame, text="文章列表:").pack(anchor=tk.W)
+        list_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=2)
 
         columns = ('name',)
-        self.tree = ttk.Treeview(list_frame, columns=columns, show='tree headings', height=15)
+        self.tree = ttk.Treeview(list_frame, columns=columns, show='tree headings', height=18)
         self.tree.heading('#0', text='序号')
         self.tree.heading('name', text='文章名称')
+        self.tree.column('#0', width=60, anchor=tk.CENTER, stretch=False)
+        self.tree.column('name', anchor=tk.W, stretch=True)
 
         scrollbar = ttk.Scrollbar(list_frame, orient=tk.VERTICAL, command=self.tree.yview)
         self.tree.configure(yscroll=scrollbar.set)
@@ -89,6 +90,7 @@ class BlogManagerApp:
 
         self.populate_tree()
 
+        # 底部按钮
         btn_frame = ttk.Frame(self.root)
         btn_frame.pack(fill=tk.X, padx=10, pady=10)
 
@@ -98,6 +100,7 @@ class BlogManagerApp:
         ttk.Button(btn_frame, text="打开文章目录", command=self.open_posts_dir).pack(side=tk.LEFT, padx=5)
         ttk.Button(btn_frame, text="Git 推送", command=self.git_push).pack(side=tk.RIGHT, padx=5)
 
+        # 状态栏
         self.status_var = tk.StringVar(value=f"共 {len(self.posts)} 篇文章")
         ttk.Label(self.root, textvariable=self.status_var, relief=tk.SUNKEN).pack(fill=tk.X, padx=10, pady=5)
 
@@ -150,29 +153,15 @@ class BlogManagerApp:
         return data
 
     def add_post(self, post_name=None):
-        """添加新文章或编辑现有文章"""
+        """添加新文章或编辑现有文章 - 左右分栏布局"""
         is_edit = post_name is not None
-        
+
         dialog = tk.Toplevel(self.root)
         dialog.title("编辑文章" if is_edit else "添加新文章")
-        dialog.geometry("800x750")
+        dialog.geometry("1000x620")
+        dialog.minsize(900, 550)
         dialog.transient(self.root)
         dialog.grab_set()
-
-        main_canvas = tk.Canvas(dialog)
-        main_scrollbar = ttk.Scrollbar(dialog, orient="vertical", command=main_canvas.yview)
-        main_frame = ttk.Frame(main_canvas)
-
-        main_frame.bind(
-            "<Configure>",
-            lambda e: main_canvas.configure(scrollregion=main_canvas.bbox("all"))
-        )
-
-        main_canvas.create_window((0, 0), window=main_frame, anchor="nw")
-        main_canvas.configure(yscrollcommand=main_scrollbar.set)
-
-        main_canvas.pack(side="left", fill="both", expand=True)
-        main_scrollbar.pack(side="right", fill="y")
 
         defaults = {
             'title': '',
@@ -193,14 +182,14 @@ class BlogManagerApp:
             if os.path.exists(index_file):
                 with open(index_file, 'r', encoding='utf-8') as f:
                     content = f.read()
-                
+
                 data = self.parse_frontmatter(content)
-                
+
                 defaults['title'] = data.get('title', '').strip('"')
                 defaults['slug'] = post_name
                 defaults['date'] = data.get('published', datetime.now().strftime("%Y-%m-%d"))
                 defaults['category'] = data.get('category', '').strip('"')
-                
+
                 tags_str = data.get('tags', '')
                 if tags_str.startswith('[') and tags_str.endswith(']'):
                     tags_str = tags_str[1:-1].strip()
@@ -208,12 +197,12 @@ class BlogManagerApp:
                     defaults['tags'] = ', '.join(tags)
                 else:
                     defaults['tags'] = tags_str.strip('"')
-                
+
                 defaults['description'] = data.get('description', '').strip('"')
                 defaults['cover'] = data.get('image', '').strip('"')
                 defaults['draft'] = data.get('draft', 'false').lower() == 'true'
                 defaults['pinned'] = data.get('pinned', 'false').lower() == 'true'
-                
+
                 if content.startswith('---'):
                     end_idx = content.find('\n---\n', 4)
                     if end_idx != -1:
@@ -221,20 +210,41 @@ class BlogManagerApp:
                 else:
                     defaults['content'] = content.strip()
 
-        info_frame = ttk.LabelFrame(main_frame, text="文章信息")
-        info_frame.pack(fill=tk.X, padx=10, pady=10)
+        # ===== 主容器：左右分栏 =====
+        main_pane = ttk.PanedWindow(dialog, orient=tk.HORIZONTAL)
+        main_pane.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
+
+        # ===== 左侧：基本信息 =====
+        left_frame = ttk.Frame(main_pane)
+        main_pane.add(left_frame, weight=1)
+
+        info_frame = ttk.LabelFrame(left_frame, text="基本信息")
+        info_frame.pack(fill=tk.BOTH, expand=True, padx=2, pady=2)
+
+        # 内容可滚动
+        info_canvas = tk.Canvas(info_frame, highlightthickness=0)
+        info_scrollbar = ttk.Scrollbar(info_frame, orient="vertical", command=info_canvas.yview)
+        info_inner = ttk.Frame(info_canvas)
+        info_inner.bind(
+            "<Configure>",
+            lambda e: info_canvas.configure(scrollregion=info_canvas.bbox("all"))
+        )
+        info_canvas.create_window((0, 0), window=info_inner, anchor="nw")
+        info_canvas.configure(yscrollcommand=info_scrollbar.set)
+        info_canvas.pack(side="left", fill="both", expand=True, padx=5, pady=5)
+        info_scrollbar.pack(side="right", fill="y")
 
         row = 0
-        ttk.Label(info_frame, text="标题 *:").grid(row=row, column=0, sticky=tk.E, padx=5, pady=5)
-        title_entry = ttk.Entry(info_frame, width=70)
+        ttk.Label(info_inner, text="标题 *:").grid(row=row, column=0, sticky=tk.E, padx=3, pady=3)
+        title_entry = ttk.Entry(info_inner, width=32)
         title_entry.insert(0, defaults['title'])
-        title_entry.grid(row=row, column=1, columnspan=2, sticky=tk.W, padx=5, pady=5)
+        title_entry.grid(row=row, column=1, sticky=tk.W, padx=3, pady=3)
 
         row += 1
-        ttk.Label(info_frame, text="Slug *:").grid(row=row, column=0, sticky=tk.E, padx=5, pady=5)
-        slug_entry = ttk.Entry(info_frame, width=55)
+        ttk.Label(info_inner, text="Slug *:").grid(row=row, column=0, sticky=tk.E, padx=3, pady=3)
+        slug_entry = ttk.Entry(info_inner, width=22)
         slug_entry.insert(0, defaults['slug'])
-        slug_entry.grid(row=row, column=1, sticky=tk.W, padx=5, pady=5)
+        slug_entry.grid(row=row, column=1, sticky=tk.W, padx=3, pady=3)
         if is_edit:
             slug_entry.config(state='readonly')
 
@@ -252,54 +262,54 @@ class BlogManagerApp:
             else:
                 messagebox.showwarning("提示", "请先填写标题")
 
-        ttk.Button(info_frame, text="根据标题生成", command=gen_slug_from_title).grid(row=row, column=2, sticky=tk.W, padx=5, pady=5)
-
+        ttk.Button(info_inner, text="← 根据标题生成", command=gen_slug_from_title).grid(row=row+1, column=1, sticky=tk.W, padx=3, pady=0)
         row += 1
-        path_label = ttk.Label(info_frame, text="保存路径: (请先填写标题或 Slug)", foreground="blue")
-        path_label.grid(row=row, column=0, columnspan=3, sticky=tk.W, padx=5, pady=5)
+
+        path_label = ttk.Label(info_inner, text="路径: (先填标题或Slug)", foreground="blue")
+        path_label.grid(row=row, column=0, columnspan=2, sticky=tk.W, padx=3, pady=2)
 
         def update_path_label(*args):
             slug = slug_entry.get().strip() or title_entry.get().strip()
             if slug:
-                path_label.config(text=f"保存路径: src/content/posts/{slug}/index.md")
+                path_label.config(text=f"路径: .../posts/{slug}/index.md")
             else:
-                path_label.config(text="保存路径: (请先填写标题或 Slug)")
+                path_label.config(text="路径: (先填标题或Slug)")
 
         title_entry.bind("<KeyRelease>", update_path_label)
         slug_entry.bind("<KeyRelease>", update_path_label)
         update_path_label()
 
         row += 1
-        ttk.Label(info_frame, text="日期:").grid(row=row, column=0, sticky=tk.E, padx=5, pady=5)
-        date_entry = ttk.Entry(info_frame, width=70)
+        ttk.Label(info_inner, text="日期:").grid(row=row, column=0, sticky=tk.E, padx=3, pady=3)
+        date_entry = ttk.Entry(info_inner, width=32)
         date_entry.insert(0, defaults['date'])
-        date_entry.grid(row=row, column=1, columnspan=2, sticky=tk.W, padx=5, pady=5)
+        date_entry.grid(row=row, column=1, sticky=tk.W, padx=3, pady=3)
 
         row += 1
-        ttk.Label(info_frame, text="分类:").grid(row=row, column=0, sticky=tk.E, padx=5, pady=5)
-        category_entry = ttk.Entry(info_frame, width=70)
+        ttk.Label(info_inner, text="分类:").grid(row=row, column=0, sticky=tk.E, padx=3, pady=3)
+        category_entry = ttk.Entry(info_inner, width=32)
         category_entry.insert(0, defaults['category'])
-        category_entry.grid(row=row, column=1, columnspan=2, sticky=tk.W, padx=5, pady=5)
+        category_entry.grid(row=row, column=1, sticky=tk.W, padx=3, pady=3)
 
         row += 1
-        ttk.Label(info_frame, text="标签:").grid(row=row, column=0, sticky=tk.E, padx=5, pady=5)
-        tags_entry = ttk.Entry(info_frame, width=70)
+        ttk.Label(info_inner, text="标签:").grid(row=row, column=0, sticky=tk.E, padx=3, pady=3)
+        tags_entry = ttk.Entry(info_inner, width=32)
         tags_entry.insert(0, defaults['tags'])
-        tags_entry.grid(row=row, column=1, columnspan=2, sticky=tk.W, padx=5, pady=5)
-        ttk.Label(info_frame, text="(多个标签用逗号分隔，如: 前端, 开发)", foreground="gray").grid(row=row+1, column=1, columnspan=2, sticky=tk.W, padx=5, pady=0)
+        tags_entry.grid(row=row, column=1, sticky=tk.W, padx=3, pady=3)
+        ttk.Label(info_inner, text="(逗号分隔)", foreground="gray").grid(row=row+1, column=1, sticky=tk.W, padx=3, pady=0)
         row += 1
 
         row += 1
-        ttk.Label(info_frame, text="描述:").grid(row=row, column=0, sticky=tk.NE, padx=5, pady=5)
-        description_text = tk.Text(info_frame, width=70, height=2)
+        ttk.Label(info_inner, text="描述:").grid(row=row, column=0, sticky=tk.NE, padx=3, pady=3)
+        description_text = tk.Text(info_inner, width=28, height=3, wrap=tk.WORD)
         description_text.insert(tk.END, defaults['description'])
-        description_text.grid(row=row, column=1, columnspan=2, sticky=tk.W, padx=5, pady=5)
+        description_text.grid(row=row, column=1, sticky=tk.W, padx=3, pady=3)
 
         row += 1
-        ttk.Label(info_frame, text="封面:").grid(row=row, column=0, sticky=tk.E, padx=5, pady=5)
-        cover_entry = ttk.Entry(info_frame, width=55)
+        ttk.Label(info_inner, text="封面:").grid(row=row, column=0, sticky=tk.E, padx=3, pady=3)
+        cover_entry = ttk.Entry(info_inner, width=22)
         cover_entry.insert(0, defaults['cover'])
-        cover_entry.grid(row=row, column=1, sticky=tk.W, padx=5, pady=5)
+        cover_entry.grid(row=row, column=1, sticky=tk.W, padx=3, pady=3)
 
         cover_info = {"path": ""}
 
@@ -316,23 +326,29 @@ class BlogManagerApp:
                 cover_entry.delete(0, tk.END)
                 cover_entry.insert(0, f"./images/{safe_name}")
 
-        ttk.Button(info_frame, text="选择图片", command=select_cover).grid(row=row, column=2, sticky=tk.W, padx=5, pady=5)
-
+        ttk.Button(info_inner, text="选择图片", command=select_cover).grid(row=row+1, column=1, sticky=tk.W, padx=3, pady=0)
         row += 1
-        opt_frame = ttk.Frame(info_frame)
-        opt_frame.grid(row=row, column=0, columnspan=3, sticky=tk.W, padx=5, pady=10)
+
+        row += 2
+        opt_frame = ttk.Frame(info_inner)
+        opt_frame.grid(row=row, column=0, columnspan=2, sticky=tk.W, padx=3, pady=8)
 
         draft_var = tk.BooleanVar(value=defaults['draft'])
         pinned_var = tk.BooleanVar(value=defaults['pinned'])
 
-        ttk.Checkbutton(opt_frame, text="草稿（不显示给读者）", variable=draft_var).pack(side=tk.LEFT, padx=10)
-        ttk.Checkbutton(opt_frame, text="置顶", variable=pinned_var).pack(side=tk.LEFT, padx=10)
+        ttk.Checkbutton(opt_frame, text="草稿", variable=draft_var).pack(side=tk.LEFT, padx=5)
+        ttk.Checkbutton(opt_frame, text="置顶", variable=pinned_var).pack(side=tk.LEFT, padx=5)
 
-        content_frame = ttk.LabelFrame(dialog, text="文章内容 (Markdown)")
-        content_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        # ===== 右侧：文章内容 =====
+        right_frame = ttk.Frame(main_pane)
+        main_pane.add(right_frame, weight=3)
 
+        content_frame = ttk.LabelFrame(right_frame, text="文章内容 (Markdown)")
+        content_frame.pack(fill=tk.BOTH, expand=True, padx=2, pady=2)
+
+        # 工具栏
         toolbar = ttk.Frame(content_frame)
-        toolbar.pack(fill=tk.X, padx=5, pady=5)
+        toolbar.pack(fill=tk.X, padx=5, pady=4)
 
         post_state = {"dir": None, "images_dir": None, "slug": None}
 
@@ -380,22 +396,34 @@ class BlogManagerApp:
                 return
             pwd = simpledialog.askstring("插入网盘链接", "请输入提取码（可留空）:") or ""
             text = "网盘下载"
+            if 'pan.xunlei.com' in url:
+                text = "迅雷下载"
+            elif 'pan.quark.cn' in url:
+                text = "夸克下载"
             if pwd:
-                content_text.insert(tk.INSERT, f"[{text}]({url})  提取码：{pwd}\n\n")
+                content_text.insert(tk.INSERT, f"{text}：{url}\n提取码：{pwd}\n\n")
             else:
-                content_text.insert(tk.INSERT, f"[{text}]({url})\n\n")
+                content_text.insert(tk.INSERT, f"{text}：{url}\n\n")
 
         ttk.Button(toolbar, text="🖼️ 插入图片", command=insert_image).pack(side=tk.LEFT, padx=3)
         ttk.Button(toolbar, text="🔗 插入链接", command=insert_link).pack(side=tk.LEFT, padx=3)
         ttk.Button(toolbar, text="☁️ 插入网盘链接", command=insert_cloud_link).pack(side=tk.LEFT, padx=3)
-        ttk.Label(toolbar, text="💡 图片自动复制到文章自己的 images 目录", foreground="gray").pack(side=tk.LEFT, padx=10)
+        ttk.Label(toolbar, text="图片自动复制到文章images目录", foreground="gray").pack(side=tk.LEFT, padx=8)
 
-        content_text = tk.Text(content_frame, wrap=tk.WORD)
+        # 内容编辑区（带滚动条）
+        content_text_frame = ttk.Frame(content_frame)
+        content_text_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+        content_text = tk.Text(content_text_frame, wrap=tk.WORD)
         content_text.insert(tk.END, defaults['content'])
-        content_text.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        content_sb = ttk.Scrollbar(content_text_frame, orient=tk.VERTICAL, command=content_text.yview)
+        content_text.configure(yscrollcommand=content_sb.set)
+        content_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        content_sb.pack(side=tk.RIGHT, fill=tk.Y)
 
-        btn_frame = ttk.Frame(main_frame)
-        btn_frame.pack(fill=tk.X, padx=10, pady=10)
+        # ===== 底部按钮 =====
+        bottom_frame = ttk.Frame(dialog)
+        bottom_frame.pack(fill=tk.X, padx=10, pady=8)
 
         def do_save():
             title = title_entry.get().strip()
@@ -471,8 +499,8 @@ class BlogManagerApp:
             self.refresh_posts()
             messagebox.showinfo("成功", f"文章 '{title}' {'更新' if is_edit else '创建'}成功！\n\n路径: src/content/posts/{folder_name}/")
 
-        ttk.Button(btn_frame, text="✓ 保存文章", command=do_save).pack(side=tk.RIGHT, padx=5)
-        ttk.Button(btn_frame, text="取消", command=dialog.destroy).pack(side=tk.RIGHT, padx=5)
+        ttk.Button(bottom_frame, text="取消", command=dialog.destroy).pack(side=tk.RIGHT, padx=5)
+        ttk.Button(bottom_frame, text="✓ 保存文章", command=do_save).pack(side=tk.RIGHT, padx=5)
 
         title_entry.focus_set()
 
@@ -491,7 +519,7 @@ class BlogManagerApp:
         """删除文章"""
         selection = self.tree.selection()
         if not selection:
-            messagebox.showwarning("警告", "请先选择要删除的文章")
+            messagebox.showwarning("警告", "请先选择要编辑的文章")
             return
 
         item = selection[0]
@@ -514,11 +542,9 @@ class BlogManagerApp:
             messagebox.showerror("错误", "无法打开目录")
 
     def git_push(self):
-        """Git推送 - 显示日志窗口"""
-        project_dir = os.path.dirname(POSTS_DIR)
-        commit_msg = simpledialog.askstring("提交信息", "请输入提交信息:")
-        if not commit_msg:
-            return
+        """Git推送 - 自动提交（commit message固定为update）"""
+        project_dir = os.path.dirname(os.path.dirname(POSTS_DIR))
+        commit_msg = "update"
 
         log_dialog = tk.Toplevel(self.root)
         log_dialog.title("Git 推送")
@@ -543,7 +569,7 @@ class BlogManagerApp:
             def worker():
                 commands = [
                     ("git add -A", ["git", "-C", project_dir, "add", "-A"]),
-                    ("git status", ["git", "-C", project_dir, "status"]),
+                    ("git status", ["git", "-C", project_dir, "status", "--short"]),
                     (f'git commit -m "{commit_msg}"', ["git", "-C", project_dir, "commit", "-m", commit_msg]),
                     ("git push", ["git", "-C", project_dir, "push"]),
                 ]
