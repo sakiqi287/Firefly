@@ -6,9 +6,9 @@ image: ./images/13.jpg
 ---
 
 原神雷电将军
+链接：https://pan.xunlei.com/s/VOtODrwzh2TwftEt54kqvVVJA1#
+提取码：y3t6
 ![16.jpg](./images/16.jpg)
-
-迅雷链接：https://pan.xunlei.com/s/VOtODrwzh2TwftEt54kqvVVJA1
 
 ![27.jpg](./images/27.jpg)
 

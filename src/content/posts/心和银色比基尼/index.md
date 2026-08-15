@@ -9,6 +9,7 @@ tags: ["布丁大法"]
 
 ![1_22_.jpeg](./images/1_22_.jpeg)
 
-迅雷链接：https://pan.xunlei.com/s/VOxopyzgClfrBWJacIEOY-3XA1
-夸克链接：https://pan.quark.cn/s/80491eeb38ac
+迅雷链接：https://pan.xunlei.com/s/VOxopyzgClfrBWJacIEOY-3XA1#
+提取码：t84g
 
+夸克链接：https://pan.quark.cn/s/80491eeb38ac

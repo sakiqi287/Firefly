@@ -6,9 +6,11 @@ image: ./images/1_.jpg
 ---
 
 ## 纳维娅
-![1_.jpg](./images/1_.jpg)
+链接：https://pan.xunlei.com/s/VOv_9xlN-VH8TJ2_evZGG3pMA1#
+提取码：yehg
 
-迅雷链接：https://pan.xunlei.com/s/VOv_9xlN-VH8TJ2_evZGG3pMA1
+
+![1_.jpg](./images/1_.jpg)
 
 ![1_3_.jpg](./images/1_3_.jpg)
 

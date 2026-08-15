@@ -6,9 +6,11 @@ tags: ["咬一口兔娘"]
 ---
 
 主将的假期
-![0014.jpg](./images/0014.jpg)
 
-迅雷链接：https://pan.xunlei.com/s/VOtlvIklKYqlFe2oEwCvyKWRA1
+链接：https://pan.xunlei.com/s/VOtlvIklKYqlFe2oEwCvyKWRA1#
+提取码：kupq
+
+![0014.jpg](./images/0014.jpg)
 
 ![0025.jpg](./images/0025.jpg)
 

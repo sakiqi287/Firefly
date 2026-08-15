@@ -9,6 +9,7 @@ yeonyu - [ARTGRAVIA]
 
 ![_ARTGRAVIA_VOL.713_083_.jpg](./images/_ARTGRAVIA_VOL.713_083_.jpg)
 
-迅雷链接：https://pan.xunlei.com/s/VOya6swpaeIO8aNDcwocYXg7A1
-夸克链接：https://pan.quark.cn/s/7b1f71396408
+迅雷链接：https://pan.xunlei.com/s/VOya6swpaeIO8aNDcwocYXg7A1#
+提取码：bsbk
 
+夸克链接：https://pan.quark.cn/s/7b1f71396408

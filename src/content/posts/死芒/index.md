@@ -6,9 +6,11 @@ tags: ["白栎"]
 ---
 
 白栎
-![0022.JPG](./images/0022.JPG)
 
-迅雷链接：https://pan.xunlei.com/s/VOv9wXzzu-EaYZAQBrsDxPgpA1
+链接：https://pan.xunlei.com/s/VOv9wXzzu-EaYZAQBrsDxPgpA1#
+提取码：3mpm
+
+![0022.JPG](./images/0022.JPG)
 
 ![0020.JPG](./images/0020.JPG)
 

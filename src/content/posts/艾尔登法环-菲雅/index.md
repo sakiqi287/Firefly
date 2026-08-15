@@ -9,7 +9,7 @@ tags: ["小仓千代w"]
 
 ![1_43_.jpg](./images/1_43_.jpg)
 
-迅雷链接：https://pan.xunlei.com/s/VOw2JL9uHqYFsm49n2tZROQGA1
-
 内容合集在此
+链接：https://pan.xunlei.com/s/VOw2JL9uHqYFsm49n2tZROQGA1
+提取码：abtu
 复制这段内容后打开迅雷，查看更方便

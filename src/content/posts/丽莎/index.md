@@ -9,8 +9,9 @@ tags: ["九言"]
 
 ![1_25_.JPG](./images/1_25_.JPG)
 
-迅雷链接：https://pan.xunlei.com/s/VOw_U6vrlTh_0yp4MZDiXihSA1
-夸克链接：https://pan.quark.cn/s/25ad893128ef
-
 内容合集在此分享文件：2026.07.3
+链接：https://pan.xunlei.com/s/VOw_U6vrlTh_0yp4MZDiXihSA1#
+提取码：trdc
 复制这段内容后打开迅雷，查看更方便
+
+夸克链接：https://pan.quark.cn/s/25ad893128ef

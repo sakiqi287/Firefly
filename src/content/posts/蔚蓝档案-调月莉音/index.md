@@ -9,6 +9,7 @@ tags: ["星之迟迟"]
 
 ![4ee6cc8caca7b47fadea03e5c3f24a4e_720.jpg](./images/4ee6cc8caca7b47fadea03e5c3f24a4e_720.jpg)
 
-迅雷链接：https://pan.xunlei.com/s/VOyBVU94dwgHJ3DGWkVZrZsnA1
-夸克链接：https://pan.quark.cn/s/6787ab1867eb
+迅雷链接：https://pan.xunlei.com/s/VOyBVU94dwgHJ3DGWkVZrZsnA1#
+提取码：7r8g
 
+夸克链接：https://pan.quark.cn/s/6787ab1867eb

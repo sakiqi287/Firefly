@@ -6,9 +6,11 @@ tags: ["起司块"]
 ---
 
 碧蓝航线大凤
-![2.jpg](./images/2.jpg)
 
-迅雷链接：https://pan.xunlei.com/s/VOvsxtAgURnSmntEI6PiK-d8A1
+链接：https://pan.xunlei.com/s/VOvsxtAgURnSmntEI6PiK-d8A1#
+提取码：d3uj
+
+![2.jpg](./images/2.jpg)
 
 ![1_2_.jpg](./images/1_2_.jpg)
 

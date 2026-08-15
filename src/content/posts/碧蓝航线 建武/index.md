@@ -8,9 +8,9 @@ image: ./images/1_5_.jpg
 ## 标题
 碧蓝航线 建武
 [链接文本](https://)
+链接：https://pan.xunlei.com/s/VOv_D_DFIhGhO-Xw4Pi8r1b2A1#
+提取码：mmsw
 ![1_.jpg](./images/1_.jpg)
-
-迅雷链接：https://pan.xunlei.com/s/VOv_D_DFIhGhO-Xw4Pi8r1b2A1
 
 ![1_5_.jpg](./images/1_5_.jpg)
 

@@ -6,9 +6,11 @@ tags: ["rioko凉凉子"]
 ---
 
 尾张毛衣
-![1_6_.jpg](./images/1_6_.jpg)
 
-迅雷链接：https://pan.xunlei.com/s/VOvrEWQk3jatoU9-afnAzBg2A1
+链接：https://pan.xunlei.com/s/VOvrEWQk3jatoU9-afnAzBg2A1#
+提取码：z3aj
+
+![1_6_.jpg](./images/1_6_.jpg)
 
 ![1_14_.jpg](./images/1_14_.jpg)
 

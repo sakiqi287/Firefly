@@ -9,6 +9,8 @@ tags: ["纸悦Etsu_ko"]
 
 ![0034_compressed.jpg](./images/0034_compressed.jpg)
 
-迅雷链接：https://pan.xunlei.com/s/VOxQDs80brvvprQV2bPvHTDKA1
-夸克链接：https://pan.quark.cn/s/5926b50838e3
 
+迅雷链接：https://pan.xunlei.com/s/VOxQDs80brvvprQV2bPvHTDKA1#
+提取码：2qgb
+
+夸克链接：https://pan.quark.cn/s/5926b50838e3

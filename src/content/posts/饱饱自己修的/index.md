@@ -9,6 +9,7 @@ tags: ["铁兽叫兽"]
 
 ![DSC07471_compressed.jpg](./images/DSC07471_compressed.jpg)
 
-迅雷链接：https://pan.xunlei.com/s/VOyfKpxZkfIUpX4hk7W4GmmsA1
-夸克链接：https://pan.quark.cn/s/fdded3265b62
+迅雷链接：https://pan.xunlei.com/s/VOyfKpxZkfIUpX4hk7W4GmmsA1#
+提取码：2yxv
 
+夸克链接：https://pan.quark.cn/s/fdded3265b62
