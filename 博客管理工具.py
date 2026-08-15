@@ -447,6 +447,25 @@ class BlogManagerApp:
         final_content = re.sub(r'\n{4,}', '\n\n\n', final_content)
         return final_content
     
+    def _batch_convert_links(self):
+        converted = 0
+        for name in os.listdir(POSTS_DIR):
+            md_path = os.path.join(POSTS_DIR, name, "index.md")
+            if not os.path.exists(md_path):
+                continue
+            try:
+                with open(md_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                original = content
+                new_content = self._auto_convert_links(content)
+                if new_content != original:
+                    with open(md_path, "w", encoding="utf-8") as f:
+                        f.write(new_content)
+                    converted += 1
+            except Exception:
+                pass
+        return converted
+    
     def parse_frontmatter(self, content):
         data = {}
         if content.startswith('---'):
@@ -981,6 +1000,10 @@ class BlogManagerApp:
         def run_git():
             import threading
             def worker():
+                log_dialog.after(0, lambda: log_text.insert(tk.END, "🔄 正在转换文章中的网盘链接为按钮样式...\n", 'info'))
+                converted = self._batch_convert_links()
+                log_dialog.after(0, lambda: log_text.insert(tk.END, f"   转换完成：更新 {converted} 篇\n\n", 'info'))
+                
                 commands = [
                     ("git add -A", ["git", "-C", project_dir, "add", "-A"]),
                     ("git status", ["git", "-C", project_dir, "status"]),
