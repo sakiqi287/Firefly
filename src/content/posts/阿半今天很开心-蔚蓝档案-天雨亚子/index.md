@@ -12,4 +12,4 @@ tags: ["阿半今天很开心"]
 迅雷链接：https://pan.xunlei.com/s/VP-234Bl8WhY63B0uOIywq2HA1#
 提取码：fdv7
 
-夸克链接:https://pan.quark.cn/s/966c8fe66d25
+夸克链接：https://pan.quark.cn/s/966c8fe66d25

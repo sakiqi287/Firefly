@@ -680,7 +680,12 @@ class BlogManagerApp:
             draft = draft_var.get()
             pinned = pinned_var.get()
             
+            original_content = content
             content = self._auto_convert_links(content)
+            
+            if content != original_content:
+                content_text.delete("1.0", tk.END)
+                content_text.insert("1.0", content)
             
             if not title:
                 messagebox.showerror("错误", "请填写标题")
