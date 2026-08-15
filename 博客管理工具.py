@@ -367,7 +367,9 @@ class BlogManagerApp:
         if not xunlei_url and not quark_url:
             return content
 
-        pwd_m = re.search(r'(?:提取码|密码|解压码|pwd)[:：=]?\s*([A-Za-z0-9]{4,8})', content, re.IGNORECASE)
+        pwd_m = re.search(r'提取码[\s：:=#·\-_\.]*([A-Za-z0-9]{4,8})', content, re.IGNORECASE)
+        if not pwd_m:
+            pwd_m = re.search(r'(?:密码|解压码|pwd)[\s：:=#·\-_\.]*([A-Za-z0-9]{4,8})', content, re.IGNORECASE)
         if pwd_m:
             extract_code = pwd_m.group(1)
 

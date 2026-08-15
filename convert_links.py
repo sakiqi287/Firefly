@@ -49,8 +49,10 @@ def convert_post(md_path):
     if quark_all:
         quark_url = quark_all[0].rstrip('#')
 
-    # 找提取码
-    pwd_m = re.search(r'(?:提取码|密码|解压码|pwd)[:：=]?\s*([A-Za-z0-9]{4,8})', content, re.IGNORECASE)
+    # 找提取码：只要出现「提取码」三个字，后面跟 4-8 位字母数字就算
+    pwd_m = re.search(r'提取码[\s：:=#·\-_\.]*([A-Za-z0-9]{4,8})', content, re.IGNORECASE)
+    if not pwd_m:
+        pwd_m = re.search(r'(?:密码|解压码|pwd)[\s：:=#·\-_\.]*([A-Za-z0-9]{4,8})', content, re.IGNORECASE)
     if pwd_m:
         extract_code = pwd_m.group(1)
 
@@ -58,13 +60,16 @@ def convert_post(md_path):
     if not xunlei_url and not quark_url:
         return False
 
-    # 检查是否需要更新：已有的按钮URL没问题且没有末尾#，则跳过
+    # 检查是否需要更新
     has_btn = 'style="display:inline-flex' in content
     old_hash = re.search(r'href="(https?://pan\.xunlei\.com/s/[^"]+#)"', content)
+    has_pwd_html = bool(re.search(r'<p[^>]*>提取码.*?<code', content, re.DOTALL))
+    has_pwd_text = bool(pwd_m)
     if has_btn and not old_hash:
-        # 已有按钮且没有#号问题，检查是否有遗漏的纯文本链接
         leftover_link = re.search(r'^\s*(?:迅雷链接|夸克链接|迅雷下载|链接|迅雷|夸克)[:：]\s*https?://', content, re.MULTILINE)
-        if not leftover_link:
+        # 如果已有按钮、无提取码HTML、但文中还能找到提取码文本 -> 需要补
+        need_append_pwd = (has_pwd_text and not has_pwd_html)
+        if not leftover_link and not need_append_pwd:
             return False
 
     # 构建按钮 HTML
