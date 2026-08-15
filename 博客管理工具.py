@@ -353,6 +353,104 @@ class BlogManagerApp:
         self.populate_tree()
         self.status_var.set(f"已刷新，共 {len(self.posts)} 篇文章")
     
+    def _auto_convert_links(self, content):
+        xunlei_url = None
+        quark_url = None
+        extract_code = None
+
+        xunlei_all = re.findall(r'https?://pan\.xunlei\.com/s/[^\s#"\'>)]+', content)
+        if xunlei_all:
+            xunlei_url = xunlei_all[0].rstrip('#')
+
+        quark_all = re.findall(r'https?://pan\.quark\.cn/s/[^\s#"\'>)\n]+', content)
+        if quark_all:
+            quark_url = quark_all[0].rstrip('#')
+
+        if not xunlei_url and not quark_url:
+            return content
+
+        pwd_m = re.search(r'(?:提取码|密码|解压码|pwd)[\s：:=#·\-_\.]*([A-Za-z0-9]{4,8})', content, re.IGNORECASE)
+        if pwd_m:
+            extract_code = pwd_m.group(1)
+
+        BTN_XUNLEI = (
+            '<a href="{href}" target="_blank" rel="noopener noreferrer" '
+            'style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;'
+            'background:linear-gradient(135deg,#2196F3,#1976D2);color:#fff;border-radius:8px;'
+            'text-decoration:none;font-weight:600;box-shadow:0 2px 8px rgba(33,150,243,0.3);'
+            'transition:transform .2s,box-shadow .2s;" '
+            'onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 4px 12px rgba(33,150,243,0.4)\'" '
+            'onmouseout="this.style.transform=\'translateY(0)\';this.style.boxShadow=\'0 2px 8px rgba(33,150,243,0.3)\'">'
+            '<span>🌩️</span><span>迅雷下载</span></a>'
+        )
+        BTN_QUARK = (
+            '<a href="{href}" target="_blank" rel="noopener noreferrer" '
+            'style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;'
+            'background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:8px;'
+            'text-decoration:none;font-weight:600;box-shadow:0 2px 8px rgba(102,126,234,0.3);'
+            'transition:transform .2s,box-shadow .2s;" '
+            'onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 4px 12px rgba(102,126,234,0.4)\'" '
+            'onmouseout="this.style.transform=\'translateY(0)\';this.style.boxShadow=\'0 2px 8px rgba(102,126,234,0.3)\'">'
+            '<span>🌀</span><span>夸克下载</span></a>'
+        )
+        BTN_WRAP_START = '<div style="display:flex;gap:12px;flex-wrap:wrap;margin:16px 0;">'
+        BTN_WRAP_END = '</div>'
+
+        buttons_html = BTN_WRAP_START
+        if xunlei_url:
+            buttons_html += BTN_XUNLEI.format(href=xunlei_url)
+        if quark_url:
+            buttons_html += BTN_QUARK.format(href=quark_url)
+        buttons_html += BTN_WRAP_END
+
+        if extract_code:
+            buttons_html += f'\n<p style="margin-top:8px;color:#666;font-size:14px;">提取码：<code style="background:#f5f5f5;padding:2px 8px;border-radius:4px;">{extract_code}</code></p>'
+
+        # 清除旧的纯文本链接行 + 旧的按钮块（如果已存在），避免重复
+        new_content = re.sub(
+            r'<div style="display:flex;gap:12px;flex-wrap:wrap;margin:16px 0;">.*?</div>\s*(?:<p[^>]*>提取码.*?</p>)?',
+            '',
+            content,
+            flags=re.DOTALL
+        )
+        new_content = re.sub(
+            r'^\s*(?:迅雷链接|夸克链接|迅雷下载|夸克下载|百度网盘链接|阿里云盘链接|链接|迅雷|夸克)[\s：:=]*\s*https?://[^\s]+\s*$\n?',
+            '',
+            new_content,
+            flags=re.MULTILINE
+        )
+        if extract_code:
+            new_content = re.sub(
+                rf'^\s*(?:提取码|密码|解压码|pwd)[\s：:=#·\-_\.]*{re.escape(extract_code)}\s*$\n?',
+                '',
+                new_content,
+                flags=re.MULTILINE | re.IGNORECASE
+            )
+        new_content = re.sub(r'^.*复制这段内容后打开(?:手机)?迅雷App.*$\n?', '', new_content, flags=re.MULTILINE)
+
+        # 在 frontmatter 后的第一张图片之后插入按钮
+        parts = new_content.split('---', 2)
+        if len(parts) >= 3:
+            fm_start = parts[0]
+            fm_body = parts[1]
+            after_fm = parts[2]
+            img_match = re.search(r'!\[.*?\]\(.*?\)', after_fm)
+            if img_match:
+                img_end = img_match.end()
+                newline_after_img = after_fm.find('\n', img_end)
+                if newline_after_img == -1:
+                    newline_after_img = len(after_fm)
+                insert_pos = newline_after_img
+                after_fm_new = after_fm[:insert_pos] + '\n\n' + buttons_html + '\n\n' + after_fm[insert_pos:].lstrip('\n')
+            else:
+                after_fm_new = '\n' + buttons_html + '\n\n' + after_fm.lstrip('\n')
+            final_content = fm_start + '---' + fm_body + '---' + after_fm_new
+        else:
+            final_content = new_content + '\n\n' + buttons_html + '\n'
+
+        final_content = re.sub(r'\n{4,}', '\n\n\n', final_content)
+        return final_content
+    
     def parse_frontmatter(self, content):
         data = {}
         if content.startswith('---'):
@@ -585,6 +683,13 @@ class BlogManagerApp:
             content = content_text.get("1.0", tk.END).strip()
             draft = draft_var.get()
             pinned = pinned_var.get()
+            
+            # 自动将纯文本网盘链接转为下载按钮 + 提取码标注
+            original_content = content
+            content = self._auto_convert_links(content)
+            if content != original_content:
+                content_text.delete("1.0", tk.END)
+                content_text.insert("1.0", content)
             
             if not title:
                 messagebox.showerror("错误", "请填写标题")

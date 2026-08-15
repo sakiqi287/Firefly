@@ -206,6 +206,120 @@ const relatedPosts = await getRelatedPosts(entry, 5);
       }
     })();
   </script>
+
+  <!-- 网盘链接转下载按钮（纯文本 -> HTML按钮 + 提取码标注） -->
+  <script is:inline>
+    (function () {
+      function transformPanLinks(root) {
+        if (!root) return;
+        var BTN_XUNLEI_START = '<a href="';
+        var BTN_XUNLEI_MID = '" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:linear-gradient(135deg,#2196F3,#1976D2);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 2px 8px rgba(33,150,243,0.3);transition:transform .2s,box-shadow .2s;" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 4px 12px rgba(33,150,243,0.4)\'" onmouseout="this.style.transform=\'translateY(0)\';this.style.boxShadow=\'0 2px 8px rgba(33,150,243,0.3)\'"><span>🌩️</span><span>迅雷下载</span></a>';
+        var BTN_QUARK_START = '<a href="';
+        var BTN_QUARK_MID = '" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 2px 8px rgba(102,126,234,0.3);transition:transform .2s,box-shadow .2s;" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 4px 12px rgba(102,126,234,0.4)\'" onmouseout="this.style.transform=\'translateY(0)\';this.style.boxShadow=\'0 2px 8px rgba(102,126,234,0.3)\'"><span>🌀</span><span>夸克下载</span></a>';
+        var WRAP_START = '<div style="display:flex;gap:12px;flex-wrap:wrap;margin:16px 0;">';
+        var WRAP_END = '</div>';
+
+        // 找包含 "迅雷下载" / "迅雷链接" / "夸克下载" / "夸克链接" / "提取码" / "链接:" 的段落
+        var textNodes = [];
+        var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+        var n;
+        while (n = walker.nextNode()) {
+          var t = n.nodeValue || '';
+          if (/迅雷|夸克|提取码|链接[:：]/.test(t)) {
+            textNodes.push(n);
+          }
+        }
+
+        // 收集本段落（同一parent p/div）的数据：迅雷URL、夸克URL、提取码
+        var processed = new WeakSet();
+        var groups = new Map(); // key: parentEl, value: {xl, qk, pwd, startNode, lines}
+
+        for (var i = 0; i < textNodes.length; i++) {
+          var tn = textNodes[i];
+          var parent = tn.parentNode;
+          if (!parent) continue;
+          // 如果这是已经替换过的父容器（a/div/code/style内），跳过
+          var tag = (parent.tagName || '').toLowerCase();
+          if (tag === 'a' || tag === 'code' || tag === 'style' || tag === 'script' || tag === 'button') continue;
+
+          var txt = tn.nodeValue || '';
+          var group = groups.get(parent);
+          if (!group) {
+            group = { xl: null, qk: null, pwd: null, nodes: [] };
+            groups.set(parent, group);
+          }
+
+          // 匹配迅雷链接
+          var xlRe = /https?:\/\/pan\.xunlei\.com\/s\/[^\s#"'>)]+/g;
+          var xlM;
+          while ((xlM = xlRe.exec(txt)) !== null) {
+            if (!group.xl) group.xl = xlM[0];
+          }
+          // 匹配夸克链接
+          var qkRe = /https?:\/\/pan\.quark\.cn\/s\/[^\s#"'>)\n]+/g;
+          var qkM;
+          while ((qkM = qkRe.exec(txt)) !== null) {
+            if (!group.qk) group.qk = qkM[0];
+          }
+          // 匹配提取码
+          var pwdRe = /(?:提取码|密码|解压码|pwd)[\s：:=#·\-_\.]*([A-Za-z0-9]{4,8})/i;
+          var pwdM = txt.match(pwdRe);
+          if (pwdM && !group.pwd) group.pwd = pwdM[1];
+
+          group.nodes.push(tn);
+        }
+
+        groups.forEach(function (g, parentEl) {
+          if (!g.xl && !g.qk) return;
+          if (processed.has(parentEl)) return;
+          processed.add(parentEl);
+
+          // 如果parentEl里已经有下载按钮HTML，跳过（避免重复转换）
+          if (/迅雷下载|夸克下载|linear-gradient/.test(parentEl.innerHTML)) return;
+
+          var btnHtml = WRAP_START;
+          if (g.xl) btnHtml += BTN_XUNLEI_START + g.xl.replace(/#$/, '') + BTN_XUNLEI_MID;
+          if (g.qk) btnHtml += BTN_QUARK_START + g.qk.replace(/#$/, '') + BTN_QUARK_MID;
+          btnHtml += WRAP_END;
+          if (g.pwd) {
+            btnHtml += '<p style="margin-top:8px;color:#666;font-size:14px;">提取码：<code style="background:#f5f5f5;padding:2px 8px;border-radius:4px;">' + g.pwd + '</code></p>';
+          }
+
+          // 将整个parentEl的内容清空，插入按钮
+          // 保留图片等非纯文本的兄弟节点：只清除包含链接/提取码的文本节点行
+          // 简化策略：把parentEl的innerHTML替换（纯文本段落本来就是<p>行）
+          // 如果parentEl内包含img，就不要整体替换，改为在parentEl末尾追加按钮+删除匹配文本节点
+          var hasImg = parentEl.querySelector('img, br, input');
+          if (hasImg) {
+            // 在文末追加按钮
+            for (var k = 0; k < g.nodes.length; k++) {
+              var nd = g.nodes[k];
+              if (nd && nd.parentNode) nd.parentNode.removeChild(nd);
+            }
+            var temp = document.createElement('div');
+            temp.innerHTML = btnHtml;
+            while (temp.firstChild) parentEl.appendChild(temp.firstChild);
+          } else {
+            parentEl.innerHTML = btnHtml;
+          }
+        });
+      }
+
+      function run() {
+        var roots = document.querySelectorAll('.markdown-content, .custom-md, [data-pagefind-body]');
+        if (roots.length === 0) roots = [document.body];
+        for (var i = 0; i < roots.length; i++) transformPanLinks(roots[i]);
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', run);
+      } else {
+        run();
+      }
+      if (window.swup) {
+        window.swup.hooks.on('page:view', run);
+      }
+    })();
+  </script>
   
   <script
     is:inline
