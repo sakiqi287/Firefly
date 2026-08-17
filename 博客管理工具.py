@@ -58,6 +58,15 @@ COLORS = {
 }
 
 
+def sanitize_slug(s):
+    """统一的 slug 目录名清洗逻辑，确保 保存文章 / 生成slug / 插入图片 三处使用相同目录名"""
+    if not s:
+        return ''
+    s = s.strip().replace(' ', '-')
+    s = re.sub(r'[\\/:*?"<>|]', '', s)
+    return s
+
+
 def apply_modern_style(root):
     style = ttk.Style(root)
     
@@ -588,8 +597,7 @@ class BlogManagerApp:
                 return
             title = title_entry.get().strip()
             if title:
-                s = title.strip().replace(' ', '-')
-                s = re.sub(r'[\\/:*?"<>|]', '', s)
+                s = sanitize_slug(title)
                 slug_entry.delete(0, tk.END)
                 slug_entry.insert(0, s)
                 update_path_label()
@@ -603,7 +611,8 @@ class BlogManagerApp:
         path_label.grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=(0, 12))
         
         def update_path_label(*args):
-            slug = slug_entry.get().strip() or title_entry.get().strip()
+            raw = slug_entry.get().strip() or title_entry.get().strip()
+            slug = sanitize_slug(raw) if raw else ''
             if slug:
                 path_label.config(text=f"📁 src/content/posts/{slug}/index.md")
             else:
@@ -695,14 +704,15 @@ class BlogManagerApp:
                 messagebox.showerror("错误", "请填写标题")
                 return
             if not slug:
-                s = title.strip().replace(' ', '-')
-                s = re.sub(r'[\\/:*?"<>|]', '', s)
-                slug = s
+                slug = sanitize_slug(title)
+            # 统一清洗目录名，确保和插入图片时使用的目录一致
+            folder_name = sanitize_slug(slug) if not is_edit else post_name
+            if not folder_name:
+                folder_name = sanitize_slug(title)
             
             if not date_str:
                 date_str = datetime.now().strftime("%Y-%m-%d")
             
-            folder_name = slug
             post_dir = os.path.join(POSTS_DIR, folder_name)
             os.makedirs(post_dir, exist_ok=True)
             images_dir = os.path.join(post_dir, 'images')
@@ -768,17 +778,21 @@ class BlogManagerApp:
         post_state = {"dir": None, "images_dir": None, "slug": None}
         
         def ensure_post_dir():
-            slug = slug_entry.get().strip() or title_entry.get().strip()
-            if not slug:
+            raw = slug_entry.get().strip() or title_entry.get().strip()
+            if not raw:
                 messagebox.showwarning("提示", "请先填写标题或 Slug")
                 return None
-            slug_clean = re.sub(r'[\\/:*?"<>|]', '', slug.replace(' ', '-'))
-            post_dir = os.path.join(POSTS_DIR, slug_clean)
+            # 编辑模式优先用已存在的文章目录名（避免重命名）
+            if is_edit:
+                folder = post_name
+            else:
+                folder = sanitize_slug(raw)
+            post_dir = os.path.join(POSTS_DIR, folder)
             images_dir = os.path.join(post_dir, 'images')
             os.makedirs(images_dir, exist_ok=True)
             post_state["dir"] = post_dir
             post_state["images_dir"] = images_dir
-            post_state["slug"] = slug_clean
+            post_state["slug"] = folder
             return images_dir
         
         def insert_image():
