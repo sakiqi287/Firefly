@@ -943,27 +943,45 @@ class BlogManagerApp:
                 for name, cmd in commands:
                     log_dialog.after(0, lambda n=name: log_text.insert(tk.END, f"$ {n}\n", 'command'))
                     log_dialog.after(0, log_text.see, tk.END)
-                    try:
-                        result = subprocess.run(
-                            cmd, capture_output=True, text=True, encoding='utf-8', cwd=project_dir
-                        )
-                        output = (result.stdout or '').strip()
-                        err_output = (result.stderr or '').strip()
-                        if output:
-                            for line in output.split('\n'):
-                                log_dialog.after(0, lambda l=line: log_text.insert(tk.END, l + "\n", 'output'))
-                        if err_output:
-                            for line in err_output.split('\n'):
-                                log_dialog.after(0, lambda l=line: log_text.insert(tk.END, l + "\n", 'error'))
-                        if result.returncode == 0:
-                            log_dialog.after(0, lambda: log_text.insert(tk.END, "\n✓ 成功\n\n", 'success'))
-                        else:
-                            if 'nothing to commit' in output or 'nothing to commit' in err_output:
-                                log_dialog.after(0, lambda: log_text.insert(tk.END, "\nℹ 没有改动，跳过提交\n\n", 'info'))
+                    is_push = 'push' in name
+                    max_retries = 3 if is_push else 1
+                    success = False
+                    for attempt in range(max_retries):
+                        if is_push and attempt > 0:
+                            log_dialog.after(0, lambda a=attempt: log_text.insert(tk.END, f"\n🔄 第 {a+1} 次重试推送...\n", 'info'))
+                            log_dialog.after(0, log_text.see, tk.END)
+                            import time; time.sleep(3)
+                        try:
+                            result = subprocess.run(
+                                cmd, capture_output=True, text=True, encoding='utf-8', cwd=project_dir
+                            )
+                            output = (result.stdout or '').strip()
+                            err_output = (result.stderr or '').strip()
+                            if output:
+                                for line in output.split('\n'):
+                                    log_dialog.after(0, lambda l=line: log_text.insert(tk.END, l + "\n", 'output'))
+                            if err_output:
+                                for line in err_output.split('\n'):
+                                    log_dialog.after(0, lambda l=line: log_text.insert(tk.END, l + "\n", 'error'))
+                            if result.returncode == 0:
+                                log_dialog.after(0, lambda: log_text.insert(tk.END, "\n✓ 成功\n\n", 'success'))
+                                success = True
+                                break
                             else:
-                                log_dialog.after(0, lambda: log_text.insert(tk.END, "\n✗ 失败\n\n", 'error'))
-                    except Exception as e:
-                        log_dialog.after(0, lambda err=e: log_text.insert(tk.END, f"错误: {err}\n\n", 'error'))
+                                if 'nothing to commit' in output or 'nothing to commit' in err_output:
+                                    log_dialog.after(0, lambda: log_text.insert(tk.END, "\nℹ 没有改动，跳过提交\n\n", 'info'))
+                                    success = True
+                                    break
+                                elif is_push and attempt < max_retries - 1:
+                                    continue
+                                else:
+                                    log_dialog.after(0, lambda: log_text.insert(tk.END, "\n✗ 失败\n\n", 'error'))
+                                    success = True
+                        except Exception as e:
+                            log_dialog.after(0, lambda err=e: log_text.insert(tk.END, f"错误: {err}\n\n", 'error'))
+                            if is_push and attempt < max_retries - 1:
+                                continue
+                            success = True
                     log_dialog.after(0, log_text.see, tk.END)
                 
                 log_dialog.after(0, lambda: log_text.insert(tk.END, "=" * 50 + "\n完成！请查看上面的日志。\n", 'info'))
