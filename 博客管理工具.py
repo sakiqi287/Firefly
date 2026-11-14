@@ -285,28 +285,43 @@ class BlogManagerApp:
         header.pack(fill=tk.X)
         
         ttk.Button(header, text="🔄 刷新列表", command=self.refresh_posts).pack(side=tk.RIGHT, padx=(8, 0))
-        ttk.Button(header, text="📤 Git 推送", command=self.git_push, style='Primary.TButton').pack(side=tk.RIGHT)
+        ttk.Button(header, text="🚀 部署网站", command=self.deploy_site, style='Primary.TButton').pack(side=tk.RIGHT, padx=(8, 0))
+        ttk.Button(header, text="📤 Git 推送", command=self.git_push).pack(side=tk.RIGHT)
         
         body = ttk.Frame(self.root, padding=(20, 16))
         body.pack(fill=tk.BOTH, expand=True)
-        
+
+        self.search_var = tk.StringVar()
+        self.count_var = tk.StringVar(value=f"共 {len(self.posts)} 篇")
+        self.visibility_button_var = tk.StringVar(value="隐藏帖子")
+
         list_card = ttk.Frame(body, style='Card.TFrame')
         list_card.pack(fill=tk.BOTH, expand=True)
         
         list_header = ttk.Frame(list_card, style='Card.TFrame', padding=(16, 14))
         list_header.pack(fill=tk.X)
         ttk.Label(list_header, text="📚 文章列表", style='CardTitle.TLabel').pack(side=tk.LEFT)
-        ttk.Label(list_header, text=f"共 {len(self.posts)} 篇", style='Hint.TLabel').pack(side=tk.RIGHT)
-        
+        ttk.Label(list_header, textvariable=self.count_var, style='Hint.TLabel').pack(side=tk.RIGHT)
+
+        search_frame = ttk.Frame(list_card, style='Card.TFrame', padding=(16, 0, 16, 12))
+        search_frame.pack(fill=tk.X)
+        ttk.Label(search_frame, text="搜索", style='CardTitle.TLabel').pack(side=tk.LEFT, padx=(0, 8))
+        search_entry = ttk.Entry(search_frame, textvariable=self.search_var)
+        search_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        search_entry.bind('<KeyRelease>', lambda e: self.populate_tree())
+        ttk.Button(search_frame, text="清空", width=6, command=self.clear_search).pack(side=tk.LEFT, padx=(8, 0))
+
         tree_frame = ttk.Frame(list_card, style='Card.TFrame')
         tree_frame.pack(fill=tk.BOTH, expand=True, padx=16, pady=(0, 16))
         
-        columns = ('name', 'date')
+        columns = ('name', 'date', 'status')
         self.tree = ttk.Treeview(tree_frame, columns=columns, show='headings', height=12)
         self.tree.heading('name', text='文章名称')
         self.tree.heading('date', text='日期')
+        self.tree.heading('status', text='状态')
         self.tree.column('name', width=400)
         self.tree.column('date', width=120)
+        self.tree.column('status', width=80, anchor=tk.CENTER)
         
         scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=self.tree.yview)
         self.tree.configure(yscroll=scrollbar.set)
@@ -316,12 +331,16 @@ class BlogManagerApp:
         
         self.populate_tree()
         self.tree.bind('<Double-1>', lambda e: self.edit_post())
-        
+        self.tree.bind('<<TreeviewSelect>>', self._update_visibility_button)
+
         btn_frame = ttk.Frame(body, padding=(0, 16, 0, 0))
         btn_frame.pack(fill=tk.X)
         
         ttk.Button(btn_frame, text="➕ 新建文章", command=self.add_post, style='Primary.TButton').pack(side=tk.LEFT, padx=(0, 8))
         ttk.Button(btn_frame, text="✏️ 编辑", command=self.edit_post).pack(side=tk.LEFT, padx=4)
+        self.hide_button = ttk.Button(btn_frame, textvariable=self.visibility_button_var, command=self.toggle_post_visibility)
+        self.hide_button.pack(side=tk.LEFT, padx=4)
+        self.hide_button.state(['disabled'])
         ttk.Button(btn_frame, text="🗑️ 删除", command=self.delete_post, style='Danger.TButton').pack(side=tk.LEFT, padx=4)
         ttk.Button(btn_frame, text="📂 打开目录", command=self.open_posts_dir).pack(side=tk.LEFT, padx=4)
         
@@ -334,29 +353,53 @@ class BlogManagerApp:
     def populate_tree(self):
         for item in self.tree.get_children():
             self.tree.delete(item)
-        
-        post_dates = {}
+
+        query = self.search_var.get().strip().lower()
+        post_info = {}
         for name in self.posts:
-            date_str = self._get_post_date(name)
-            post_dates[name] = date_str
-        
+            data = self._get_post_data(name)
+            title = data.get('title', '').strip('"')
+            date_str = data.get('published', data.get('date', '-'))
+            hidden = data.get('draft', 'false').lower() == 'true'
+            search_text = ' '.join([
+                name,
+                title,
+                data.get('category', ''),
+                data.get('tags', ''),
+            ]).lower()
+            if not query or query in search_text:
+                post_info[name] = (date_str, hidden)
+
         # 按日期倒序排列（新的在前）
-        sorted_names = sorted(self.posts, key=lambda x: post_dates.get(x, ''), reverse=True)
-        for i, name in enumerate(sorted_names):
-            self.tree.insert('', tk.END, values=(name, post_dates.get(name, '-')))
-    
-    def _get_post_date(self, slug):
+        sorted_names = sorted(post_info, key=lambda x: post_info[x][0], reverse=True)
+        for name in sorted_names:
+            date_str, hidden = post_info[name]
+            self.tree.insert('', tk.END, iid=name, values=(name, date_str, '已隐藏' if hidden else '显示中'))
+
+        if query:
+            self.count_var.set(f"找到 {len(sorted_names)} / 共 {len(self.posts)} 篇")
+        else:
+            self.count_var.set(f"共 {len(self.posts)} 篇")
+        self._update_visibility_button()
+
+    def clear_search(self):
+        self.search_var.set('')
+        self.populate_tree()
+
+    def _get_post_data(self, slug):
         index_file = os.path.join(POSTS_DIR, slug, 'index.md')
         if os.path.exists(index_file):
             try:
                 with open(index_file, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                data = self.parse_frontmatter(content)
-                return data.get('published', data.get('date', '-'))
+                    return self.parse_frontmatter(f.read())
             except Exception:
                 pass
-        return '-'
-    
+        return {}
+
+    def _get_post_date(self, slug):
+        data = self._get_post_data(slug)
+        return data.get('published', data.get('date', '-'))
+
     def refresh_posts(self):
         self.load_posts()
         self.populate_tree()
@@ -855,7 +898,76 @@ class BlogManagerApp:
         content_text.pack(fill=tk.BOTH, expand=True)
         
         title_entry.focus_set()
-    
+
+    def _update_visibility_button(self, *args):
+        if not hasattr(self, 'hide_button'):
+            return
+        selection = self.tree.selection()
+        if not selection:
+            self.visibility_button_var.set("隐藏帖子")
+            self.hide_button.state(['disabled'])
+            return
+
+        post_name = self.tree.item(selection[0], 'values')[0]
+        data = self._get_post_data(post_name)
+        hidden = data.get('draft', 'false').lower() == 'true'
+        self.visibility_button_var.set("恢复显示" if hidden else "隐藏帖子")
+        self.hide_button.state(['!disabled'])
+
+    def _set_post_hidden(self, slug, hidden):
+        index_file = os.path.join(POSTS_DIR, slug, 'index.md')
+        with open(index_file, 'r', encoding='utf-8', newline='') as f:
+            content = f.read()
+
+        match = re.match(
+            r'\A(---[ \t]*\r?\n)(.*?)(\r?\n---[ \t]*(?:\r?\n|$))',
+            content,
+            re.DOTALL,
+        )
+        if not match:
+            raise ValueError("文章缺少有效的 Frontmatter，无法修改隐藏状态")
+
+        newline = '\r\n' if '\r\n' in match.group(1) else '\n'
+        frontmatter_lines = [
+            line for line in match.group(2).splitlines()
+            if not re.match(r'^\s*draft\s*:', line)
+        ]
+        if hidden:
+            frontmatter_lines.append('draft: true')
+
+        updated_content = (
+            match.group(1)
+            + newline.join(frontmatter_lines)
+            + match.group(3)
+            + content[match.end():]
+        )
+        with open(index_file, 'w', encoding='utf-8', newline='') as f:
+            f.write(updated_content)
+
+    def toggle_post_visibility(self):
+        selection = self.tree.selection()
+        if not selection:
+            messagebox.showwarning("提示", "请先选择要隐藏或恢复显示的文章")
+            return
+
+        post_name = self.tree.item(selection[0], 'values')[0]
+        data = self._get_post_data(post_name)
+        hidden = data.get('draft', 'false').lower() == 'true'
+        new_hidden = not hidden
+        try:
+            self._set_post_hidden(post_name, new_hidden)
+        except Exception as e:
+            messagebox.showerror("错误", f"修改文章状态失败: {str(e)}")
+            return
+
+        self.refresh_posts()
+        if self.tree.exists(post_name):
+            self.tree.selection_set(post_name)
+            self.tree.see(post_name)
+        action = "已隐藏，部署后将从网站移除" if new_hidden else "已恢复显示，部署后生效"
+        self.status_var.set(f"文章 '{post_name}' {action}")
+        messagebox.showinfo("成功", f"文章 '{post_name}' {action}。")
+
     def edit_post(self):
         selection = self.tree.selection()
         if not selection:
@@ -890,6 +1002,103 @@ class BlogManagerApp:
         except:
             messagebox.showerror("错误", "无法打开目录")
     
+    def _get_cloudflare_token(self):
+        """从本地 cloudflare_token.txt 或环境变量读取部署凭证"""
+        project_dir = os.path.dirname(os.path.dirname(os.path.dirname(POSTS_DIR)))
+        token_file = os.path.join(project_dir, 'cloudflare_token.txt')
+        if os.path.exists(token_file):
+            try:
+                with open(token_file, 'r', encoding='utf-8') as f:
+                    token = f.read().strip()
+                if token:
+                    return token
+            except Exception:
+                pass
+        return os.environ.get('CLOUDFLARE_API_TOKEN', '').strip()
+
+    def deploy_site(self):
+        project_dir = os.path.dirname(POSTS_DIR)
+        cloudflare_token = self._get_cloudflare_token()
+        if not cloudflare_token:
+            messagebox.showerror(
+                "缺少部署凭证",
+                "未找到 Cloudflare API Token。\n\n"
+                "请在项目根目录创建 cloudflare_token.txt 并写入 Token，\n"
+                "或设置环境变量 CLOUDFLARE_API_TOKEN。"
+            )
+            return
+
+        log_dialog = tk.Toplevel(self.root)
+        log_dialog.title("部署网站")
+        log_dialog.geometry("720x520")
+        log_dialog.configure(bg=COLORS['bg'])
+        log_dialog.transient(self.root)
+
+        header = ttk.Frame(log_dialog, style='TFrame', padding=(20, 16))
+        header.pack(fill=tk.X)
+        ttk.Label(header, text="🚀 部署到 Cloudflare Workers...", style='Title.TLabel').pack(side=tk.LEFT)
+
+        log_frame = ttk.Frame(log_dialog, style='TFrame', padding=(20, 0))
+        log_frame.pack(fill=tk.BOTH, expand=True)
+        log_text = tk.Text(
+            log_frame, wrap=tk.WORD, font=('Consolas', 10),
+            bg=COLORS['card'], fg=COLORS['text'],
+            relief=tk.FLAT, padx=16, pady=12
+        )
+        log_text.pack(fill=tk.BOTH, expand=True)
+        log_text.tag_configure('command', foreground=COLORS['primary'])
+        log_text.tag_configure('output', foreground=COLORS['text'])
+        log_text.tag_configure('error', foreground=COLORS['danger'])
+        log_text.tag_configure('success', foreground=COLORS['success'])
+        log_text.tag_configure('info', foreground=COLORS['text_secondary'])
+
+        scrollbar = ttk.Scrollbar(log_frame, command=log_text.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        log_text.config(yscrollcommand=scrollbar.set)
+
+        btn_frame = ttk.Frame(log_dialog, style='TFrame', padding=(20, 16))
+        btn_frame.pack(fill=tk.X)
+        ttk.Button(btn_frame, text="关闭", command=log_dialog.destroy).pack(side=tk.RIGHT)
+
+        def worker():
+            commands = [
+                ("pnpm run build", "pnpm run build"),
+                ("npx wrangler deploy", "npx wrangler deploy"),
+            ]
+            env = os.environ.copy()
+            env["CLOUDFLARE_API_TOKEN"] = cloudflare_token
+
+            for name, cmd in commands:
+                log_dialog.after(0, lambda n=name: log_text.insert(tk.END, f"$ {n}\n", 'command'))
+                log_dialog.after(0, log_text.see, tk.END)
+                try:
+                    proc = subprocess.Popen(
+                        cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                        text=True, encoding='utf-8', cwd=project_dir, env=env,
+                        bufsize=1, errors='replace', shell=True
+                    )
+                    for line in proc.stdout:
+                        line = line.rstrip('\n\r')
+                        if line.strip():
+                            tag = 'error' if ('error' in line.lower() or 'ERR' in line) else 'output'
+                            log_dialog.after(0, lambda l=line, t=tag: log_text.insert(tk.END, l + "\n", t))
+                            log_dialog.after(0, log_text.see, tk.END)
+                    proc.wait()
+                    if proc.returncode == 0:
+                        log_dialog.after(0, lambda: log_text.insert(tk.END, "\n✓ 成功\n\n", 'success'))
+                    else:
+                        log_dialog.after(0, lambda: log_text.insert(tk.END, f"\n✗ 失败 (exit {proc.returncode})\n\n", 'error'))
+                        break
+                except Exception as e:
+                    log_dialog.after(0, lambda err=e: log_text.insert(tk.END, f"错误: {err}\n\n", 'error'))
+                    break
+                log_dialog.after(0, log_text.see, tk.END)
+            else:
+                log_dialog.after(0, lambda: log_text.insert(tk.END, "\n🎉 部署成功！访问 https://huiyuzi.top\n", 'success'))
+
+        import threading
+        threading.Thread(target=worker, daemon=True).start()
+
     def git_push(self):
         project_dir = os.path.dirname(POSTS_DIR)
         commit_msg = "update"
